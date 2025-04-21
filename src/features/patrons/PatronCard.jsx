@@ -18,7 +18,7 @@ export default function PatronCard() {
             <GeneralInfo />
             <VStack w={"$full"} backgroundColor={"white"} flexGrow={"1"} h={"calc(100vh - 32px - 40px * 3 - 224px - 0.75rem * 3)"} overflowY={"auto"}>
                 <HStack justifyContent={"start"} w={"$full"}>
-                    {["personal", "contact", "access", "notes", "statistics"].map(tab => (
+                    {["personal", "access", "notes", "statistics"].map(tab => (
                         <Button
                             tabIndex={"-1"}
                             onClick={() => openPatronTab(tab)}
@@ -27,7 +27,6 @@ export default function PatronCard() {
                             {...buttonStyles}
                         >
                             {tab === "personal" ? "Личные данные" :
-                             tab === "contact" ? "Контакты" :
                              tab === "access" ? "Доступ" :
                              tab === "notes" ? "Заметки" : "Статистика"}
                         </Button>
@@ -38,5 +37,6 @@ export default function PatronCard() {
         </VStack>
     );
 }
+
 
 
