@@ -22,42 +22,7 @@ const titlesList = [
 ];
 
 const initialBooks = [
-  {
-    id: 1,
-    title: "Война и мир",
-    author: "Лев Толстой",
-    publisher: "Эксмо",
-    udk: "821.161.1",
-    direction: "Литература",
-    bbk: "84(2Р)6",
-    isbn: "978-5-699-12345-0",
-    quantity: 5,
-    inventoryNumber: "INV-001"
-  },
-  {
-    id: 2,
-    title: "1984",
-    author: "Джордж Оруэлл",
-    publisher: "АСТ",
-    udk: "821.111",
-    direction: "Философия",
-    bbk: "83.3(2Р)",
-    isbn: "978-5-17-028923-6",
-    quantity: 3,
-    inventoryNumber: "INV-002"
-  },
-  {
-    id: 3,
-    title: "Мастер и Маргарита",
-    author: "Михаил Булгаков",
-    publisher: "Азбука",
-    udk: "821.161.1",
-    direction: "Роман",
-    bbk: "84(2Р)6",
-    isbn: "978-5-389-01843-0",
-    quantity: 4,
-    inventoryNumber: "INV-003"
-  },
+ 
 ];
 
 export default function One() {
@@ -76,8 +41,34 @@ export default function One() {
   const [searchAuthor, setSearchAuthor] = createSignal("");
   const [searchDirection, setSearchDirection] = createSignal("");
 
+  // Стейт для отслеживания ошибок
+  const [errors, setErrors] = createSignal({
+    title: false,
+    author: false,
+    publisher: false,
+    direction: false,
+    quantity: false,
+    udk: false,
+    bbk: false,
+    isbn: false,
+  });
+
   const addBook = () => {
-    if (!title() || !author()) return;
+    // Проверка на незаполненные поля
+    const newErrors = {
+      title: !title(),
+      author: !author(),
+      publisher: !publisher(),
+      direction: !direction(),
+      quantity: quantity() <= 0,
+      udk: !udk(),
+      bbk: !bbk(),
+      isbn: !isbn(),
+    };
+    
+    setErrors(newErrors);
+
+    if (Object.values(newErrors).includes(true)) return;  // Если есть ошибки, не добавляем книгу
 
     const generatedInventoryNumber = `INV-${Date.now()}`;
     const newBook = {
@@ -100,6 +91,7 @@ export default function One() {
     setSearchTitle("");
     setSearchAuthor("");
     setSearchDirection("");
+    setErrors({});  // Сброс ошибок
   };
 
   const deleteBook = (id) => {
@@ -121,13 +113,17 @@ export default function One() {
     }
   };
 
+  const getInputBorder = (fieldName) => {
+    return errors()[fieldName] ? "2px solid red" : undefined;
+  };
+
   return (
     <VStack w="$full" px="$7" py="$5" gap="$6" alignItems="start">
       <Heading size="lg" color="$accent11">Каталог книг</Heading>
 
       <Box w="$full" p="$4" borderRadius="$xl" boxShadow="$sm" bg="white">
         <Heading size="md" mb="$3">Добавить новую книгу</Heading>
-        <SimpleGrid columns={{ "@initial": 1, "@md": 2 }} spacing="$6"> {/* Увеличил расстояние между полями */}
+        <SimpleGrid columns={{ "@initial": 1, "@md": 2 }} spacing="$6">
 
           <Box mb="$4">
             <label>Название книги</label>
@@ -137,7 +133,7 @@ export default function One() {
               onInput={(e) => setSearchTitle(e.target.value)}
               list="titles-list"
               onChange={(e) => setTitle(e.target.value)}
-              style={{ width: "100%" }}
+              style={{ width: "100%", border: getInputBorder("title") }}
             />
             <datalist id="titles-list">
               <For each={titlesList.filter(t => t.toLowerCase().includes(searchTitle().toLowerCase()))}>
@@ -154,7 +150,7 @@ export default function One() {
               onInput={(e) => setSearchAuthor(e.target.value)}
               list="authors-list"
               onChange={(e) => setAuthor(e.target.value)}
-              style={{ width: "100%" }}
+              style={{ width: "100%", border: getInputBorder("author") }}
             />
             <datalist id="authors-list">
               <For each={authorsList.filter(a => a.toLowerCase().includes(searchAuthor().toLowerCase()))}>
@@ -165,12 +161,22 @@ export default function One() {
 
           <Box mb="$4">
             <label>Издательство</label>
-            <Input placeholder="Издательство" value={publisher()} onInput={(e) => setPublisher(e.target.value)} />
+            <Input 
+              placeholder="Издательство" 
+              value={publisher()} 
+              onInput={(e) => setPublisher(e.target.value)} 
+              style={{ border: getInputBorder("publisher") }}
+            />
           </Box>
 
           <Box mb="$4">
             <label>УДК</label>
-            <Input placeholder="УДК" value={udk()} onInput={(e) => setUdk(e.target.value)} />
+            <Input 
+              placeholder="УДК" 
+              value={udk()} 
+              onInput={(e) => setUdk(e.target.value)} 
+              style={{ border: getInputBorder("udk") }}
+            />
           </Box>
 
           <Box mb="$4">
@@ -181,7 +187,7 @@ export default function One() {
               onInput={(e) => setSearchDirection(e.target.value)}
               list="directions-list"
               onChange={(e) => setDirection(e.target.value)}
-              style={{ width: "100%" }}
+              style={{ width: "100%", border: getInputBorder("direction") }}
             />
             <datalist id="directions-list">
               <For each={directionsList.filter(d => d.toLowerCase().includes(searchDirection().toLowerCase()))}>
@@ -192,12 +198,22 @@ export default function One() {
 
           <Box mb="$4">
             <label>ББК</label>
-            <Input placeholder="ББК" value={bbk()} onInput={(e) => setBbk(e.target.value)} />
+            <Input 
+              placeholder="ББК" 
+              value={bbk()} 
+              onInput={(e) => setBbk(e.target.value)} 
+              style={{ border: getInputBorder("bbk") }}
+            />
           </Box>
 
           <Box mb="$4">
             <label>ISBN</label>
-            <Input placeholder="ISBN" value={isbn()} onInput={(e) => setIsbn(e.target.value)} />
+            <Input 
+              placeholder="ISBN" 
+              value={isbn()} 
+              onInput={(e) => setIsbn(e.target.value)} 
+              style={{ border: getInputBorder("isbn") }}
+            />
           </Box>
 
           <Box mb="$4">
@@ -208,6 +224,7 @@ export default function One() {
               placeholder="Количество"
               value={quantity()}
               onInput={(e) => setQuantity(e.target.value)}
+              style={{ border: getInputBorder("quantity") }}
             />
           </Box>
 
@@ -249,7 +266,7 @@ export default function One() {
                   <Th>ISBN</Th>
                   <Th>Кол-во</Th>
                   <Th>инв. №</Th>
-                  <Th>Действия</Th>
+                 
                 </Tr>
               </Thead>
               <Tbody>
@@ -289,6 +306,8 @@ export default function One() {
     </VStack>
   );
 }
+
+
 
 
 

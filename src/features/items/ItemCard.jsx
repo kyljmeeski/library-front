@@ -15,31 +15,40 @@ export default function ItemCard() {
             <VStack w={"$full"} backgroundColor={"white"}>
                 <HStack justifyContent={"start"} w={"$full"}>
                     <Button
-                        onClick={() => openItemTab("0")} 
-                        px={"$8"} py={"$2"} _hover={{backgroundColor: "$accent11", color: "white"}} 
-                        borderRadius={"0"} 
-                        color={state.currentItemTab == "0" ? "white" : "$blackAlpha11"} 
+                        onClick={() => openItemTab("0")}
+                        px={"$8"} py={"$2"} _hover={{ backgroundColor: "$accent11", color: "white" }}
+                        borderRadius={"0"}
+                        color={state.currentItemTab == "0" ? "white" : "$blackAlpha11"}
                         backgroundColor={state.currentItemTab == "0" ? "$accent11" : "transparent"}
                     >
                         Статистика
                     </Button>
                     <Button
-                        onClick={() => openItemTab("1")} 
-                        px={"$8"} py={"$2"} _hover={{backgroundColor: "$accent11", color: "white"}} 
-                        borderRadius={"0"} 
-                        color={state.currentItemTab == "1" ? "white" : "$blackAlpha11"} 
+                        onClick={() => openItemTab("1")}
+                        px={"$8"} py={"$2"} _hover={{ backgroundColor: "$accent11", color: "white" }}
+                        borderRadius={"0"}
+                        color={state.currentItemTab == "1" ? "white" : "$blackAlpha11"}
                         backgroundColor={state.currentItemTab == "1" ? "$accent11" : "transparent"}
                     >
                         Каталогизация
                     </Button>
                     <Button
-                        onClick={() => openItemTab("2")} 
-                        px={"$8"} py={"$2"} _hover={{backgroundColor: "$accent11", color: "white"}} 
-                        borderRadius={"0"} 
-                        color={state.currentItemTab == "2" ? "white" : "$blackAlpha11"} 
+                        onClick={() => openItemTab("2")}
+                        px={"$8"} py={"$2"} _hover={{ backgroundColor: "$accent11", color: "white" }}
+                        borderRadius={"0"}
+                        color={state.currentItemTab == "2" ? "white" : "$blackAlpha11"}
                         backgroundColor={state.currentItemTab == "2" ? "$accent11" : "transparent"}
                     >
                         Выдача книг
+                    </Button>
+                    <Button
+                        onClick={() => openItemTab("3")}
+                        px={"$8"} py={"$2"} _hover={{ backgroundColor: "$accent11", color: "white" }}
+                        borderRadius={"0"}
+                        color={state.currentItemTab == "3" ? "white" : "$blackAlpha11"}
+                        backgroundColor={state.currentItemTab == "3" ? "$accent11" : "transparent"}
+                    >
+                        Возврат книг
                     </Button>
                 </HStack>
             </VStack>
@@ -54,3 +63,4 @@ export default function ItemCard() {
         </VStack>
     )
 }
+

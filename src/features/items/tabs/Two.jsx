@@ -6,10 +6,7 @@ import { createSignal } from "solid-js";
 import { HiOutlineBell } from "solid-icons/hi";
 
 const initialData = [
-  { book: "Война и мир", user: "Иван Иванов", takenAt: "2025-03-30", returnedAt: null },
-  { book: "1984", user: "Анна Петрова", takenAt: "2025-03-28", returnedAt: "2025-04-04" },
-  { book: "Мастер и Маргарита", user: "Дмитрий Смирнов", takenAt: "2025-03-25", returnedAt: null },
-  { book: "Преступление и наказание", user: "Ольга Сидорова", takenAt: "2025-04-01", returnedAt: null },
+  
 ];
 
 const bookTitles = [

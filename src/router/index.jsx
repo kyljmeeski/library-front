@@ -1,6 +1,6 @@
 import { Route, Routes } from "@solidjs/router";
 import Dashboard from "../pages/Dashboard";
-import Circulation from "../pages/Circulation";
+
 import Items from "../pages/Items";
 import Patrons from "../pages/Patrons";
 import Personal from "../features/patrons/tabs/Personal";
@@ -10,6 +10,7 @@ import Statistics from "../features/patrons/tabs/Statistics";
 import One from "../features/items/tabs/One";
 import Two from "../features/items/tabs/Two";
 import Zero from "../features/items/tabs/Zero";
+import Three from "../features/items/tabs/Three";
 
 
 export default function AppRouter() {
@@ -21,14 +22,13 @@ return (
         <Route path="/">
             <Route path="" element={<Items />} />
         </Route>
-        <Route path="/circulation">
-            <Route path="" element={<Circulation />} />
-        </Route>
+        
         <Route path="/items" element={<Items />}>
             <Route path="" element={<Zero />} />
             <Route path="0" element={<Zero />} />
             <Route path="1" element={<One />} />
             <Route path="2" element={<Two />} />
+            <Route path="3" element={<Three />} />
            
           
         </Route>

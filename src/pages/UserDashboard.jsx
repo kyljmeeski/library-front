@@ -1,24 +1,31 @@
 import { createSignal } from 'solid-js';
-import { createEffect } from 'solid-js';
 
-const products = [
-  { id: 1, name: "Сила Воли", image: "https://covers.openlibrary.org/b/id/8674011-L.jpg" },
-  { id: 2, name: "Неизвестная книга", image: "https://covers.openlibrary.org/b/id/9876942-L.jpg" },
-  { id: 3, name: "Неизвестная книга", image: "https://covers.openlibrary.org/b/id/8674012-L.jpg" },
-  { id: 4, name: "Неизвестная книга", image: "https://covers.openlibrary.org/b/id/9094034-L.jpg" },
-  { id: 5, name: "Неизвестная книга", image: "https://covers.openlibrary.org/b/id/8674013-L.jpg" },
-  { id: 6, name: "Неизвестная книга", image: "https://covers.openlibrary.org/b/id/12345678-L.jpg" },
-  { id: 7, name: "LD07", image: "https://covers.openlibrary.org/b/id/8765432-L.jpg" },
-  { id: 8, name: "LD08", image: "https://covers.openlibrary.org/b/id/7654321-L.jpg" },
-];
+
+  const products = [
+    { id: 1, name: "Война и мир", image: "https://m.media-amazon.com/images/I/912F83swwRL._UF1000,1000_QL80_.jpg" },
+    { id: 2, name: "1984", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZ6bQvS9Fc8M9JCsn86Ni05z7_IkZ-plEC8w&s" },
+    { id: 3, name: "Мастер и Маргарита", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShOAAie_XRZZgaJ7R2vwypBXq4IztVT6qtog&s" },
+    { id: 4, name: "Преступление и наказание", image: "https://m.media-amazon.com/images/I/81gmcOTGRJL._UF1000,1000_QL80_.jpg" },
+    { id: 5, name: "Убить пересмешника", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdwxmeUg0XzuySVjKcOlfqjnBj41bvjAOyeQ&s" },
+    { id: 6, name: "Гордость и предубеждение", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-ksbSa1FFG7CdcxNWb_nUqyBiocf8gbr2uw&s" },
+    { id: 7, name: "На маяк", image: "https://cdn.azbooka.ru/cv/w1100/1115f078-5a00-4009-ab3a-917c2bebb2ad.jpg" },
+    { id: 8, name: "451 градус по Фаренгейту", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgdqsOlpa5d5uKafyx8Vifd_RjvnVgxaWQPw&s" },
+    { id: 9, name: "Анна Каренина", image: "https://cdn.azbooka.ru/cv/w1100/f85b70c8-f0e4-4104-bd2e-b3de263793d8.jpg" },
+    { id: 10, name: "Моби Дик", image: "https://basket-10.wbbasket.ru/vol1426/part142664/142664795/images/big/1.webp" },
+    { id: 11, name: "Гарри Поттер и философский камень", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTu-27xE5HVMhCp_XxxQnpZ_G1OW8J29o4Icg&s" },
+    { id: 12, name: "В поисках утраченного времени", image: "https://imo10.labirint.ru/books/199745/cover.jpg/242-0" },
+    { id: 13, name: "О дивный новый мир", image: "https://s2-goods.ozstatic.by/1000/782/121/10/10121782_0.jpg" },
+    { id: 14, name: "От нуля к единице", image: "https://static.tildacdn.com/tild3530-3133-4436-a130-653331313862/2book.jpg" }
+  ];
+  
+
+
 
 export default function UserDashboard() {
   const [cart, setCart] = createSignal([]);
   const [searchTerm, setSearchTerm] = createSignal("");
   const [showCart, setShowCart] = createSignal(false);
   const [userName, setUserName] = createSignal("Пользователь");
-  const [message, setMessage] = createSignal(""); // Сообщение о пустой корзине
-  const [showMessage, setShowMessage] = createSignal(false); // Показывать ли сообщение
   const [showProfilePopup, setShowProfilePopup] = createSignal(false);
   const [readerForm, setReaderForm] = createSignal({
     fullName: "",
@@ -47,27 +54,6 @@ export default function UserDashboard() {
 
   const clearCart = () => {
     setCart([]);
-  };
-
-  const handleBookReservation = async () => {
-    if (cart().length === 0) {
-      setMessage("Пожалуйста, добавьте книги в корзину.");
-      setShowMessage(true);  // Показываем всплывающее окно
-      setTimeout(() => {
-        setShowMessage(false); // Скрыть сообщение через 3 секунды
-      }, 3000);
-      return;
-    }
-
-    const booksToReserve = cart();
-    
-    // Симуляция вызова API
-    await new Promise((resolve) => setTimeout(resolve, 1000));  // Задержка для симуляции сетевого запроса
-
-    alert('Книги успешно забронированы!');
-    clearCart();  // Очистить корзину после бронирования
-    setMessage(""); // Очистить сообщение после успешного бронирования
-    setShowMessage(false); // Скрыть сообщение после успешного бронирования
   };
 
   const toggleProfilePopup = () => {
@@ -268,7 +254,7 @@ export default function UserDashboard() {
           right: 10px;
           color: #eee;
         }
-        .reserve-button, .clear-button {
+        .clear-button {
           background-color: rgb(86, 63, 143);
           color: #fff;
           padding: 10px;
@@ -279,7 +265,7 @@ export default function UserDashboard() {
           font-size: 16px;
           margin: 10px;
         }
-        .reserve-button:hover, .clear-button:hover {
+        .clear-button:hover {
           background-color: rgb(70, 52, 120);
         }
 
@@ -368,20 +354,19 @@ export default function UserDashboard() {
             <div class="item" key={product.id}>
               <img src={product.image} alt={product.name} />
               <h2>{product.name}</h2>
-              <button onClick={() => addToCart(product.id)}>Добавить в корзину</button>
+              <button onClick={() => addToCart(product.id)}>Взять книгу</button>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Корзина */}
       <div class={`cartTab`}>
-      <div class="close-icon" onClick={toggleCart}>✖</div>
-        <h1>Корзина</h1>
+        <div class="close-icon" onClick={toggleCart}>✖</div>
+        <h1>Список ваших книг</h1>
         
         <div class="listCart">
           {cart().length === 0 ? (
-            <div>Ваша корзина пуста</div>
+            <div>Ваш список пуст</div>
           ) : (
             cart().map((item, index) => (
               <div key={index} class="item">
@@ -392,13 +377,9 @@ export default function UserDashboard() {
           )}
         </div>
         <div class="btn">
-          <button class="reserve-button" onClick={handleBookReservation}>Забронировать</button>
-          <button class="clear-button" onClick={clearCart}>Очистить корзину</button>
+          <button class="clear-button" onClick={clearCart}>Очистить</button>
         </div>
       </div>
-
-      {/* Сообщение об ошибке */}
-      {showMessage() && <div class="error-message">{message()}</div>}
 
       {/* Попап с профилем */}
       {showProfilePopup() && (
@@ -434,12 +415,12 @@ export default function UserDashboard() {
             onInput={(e) => setReaderForm({ ...readerForm(), birthDate: e.target.value })}
           />
           <button onClick={handleSaveProfile}>Сохранить</button>
-          <div class="close-icon" onClick={toggleProfilePopup}>✖</div>
         </div>
       )}
     </div>
   );
 }
+
 
 
 

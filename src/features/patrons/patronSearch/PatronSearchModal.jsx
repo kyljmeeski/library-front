@@ -1,4 +1,4 @@
-import { Button, HStack, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, SimpleOption, SimpleSelect, Text, VStack } from "@hope-ui/solid"
+import { Button, HStack, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, VStack } from "@hope-ui/solid"
 import { useContext } from "solid-js"
 import { CurrentPatronContext } from "../../../providers/CurrentPatron"
 
@@ -10,7 +10,7 @@ export default function PatronSearchModal(props) {
         <Modal opened={props.isOpen()} onClose={() => {props.onClose(); setSearchPatron("firstName", "");
         setSearchPatron("middleName", "");
         setSearchPatron("lastName", "");
-        setSearchPatron("sex", "");
+        setSearchPatron("id", "");  // Добавили сброс для ID читателя
         setSearchPatron("address", "");}} size={"2xl"} initialFocus="#searchFirstName" closeOnOverlayClick={false}>
             <ModalOverlay />
                 <ModalContent>
@@ -38,18 +38,12 @@ export default function PatronSearchModal(props) {
                             </Text>
                             <Input value={searchPatron.lastName} size={"sm"} onInput={(e) => {setSearchPatron("lastName", e.target.value)}} />
                         </VStack>
+                        {/* Заменили Пол на ID читателя */}
                         <VStack alignItems={"start"} w={"$full"} gap={"$1"} mb={"$3"}>
                             <Text flexShrink={"0"}>
-                                Пол
+                                ID читателя
                             </Text>
-                            <SimpleSelect value={searchPatron.sex} w={"$full"} placeholder={"Выберите"} onChange={(v) => setSearchPatron("sex", v)}>
-                                <SimpleOption value={"MALE"}>
-                                    Мужской
-                                </SimpleOption>
-                                <SimpleOption value={"FEMALE"}>
-                                    Женский
-                                </SimpleOption>
-                            </SimpleSelect>
+                            <Input value={searchPatron.id} size={"sm"} onInput={(e) => {setSearchPatron("id", e.target.value)}} />
                         </VStack>
                         <VStack alignItems={"start"} w={"$full"} gap={"$1"} mb={"$3"}>
                             <Text flexShrink={"0"}>
@@ -64,7 +58,7 @@ export default function PatronSearchModal(props) {
                         setSearchPatron("firstName", "");
                         setSearchPatron("middleName", "");
                         setSearchPatron("lastName", "");
-                        setSearchPatron("sex", "");
+                        setSearchPatron("id", "");  // Сброс ID читателя
                         setSearchPatron("address", "");
                     }}>
                         Очистить
@@ -76,7 +70,7 @@ export default function PatronSearchModal(props) {
                             setSearchPatron("firstName", "");
                             setSearchPatron("middleName", "");
                             setSearchPatron("lastName", "");
-                            setSearchPatron("sex", "");
+                            setSearchPatron("id", "");  // Сброс ID читателя
                             setSearchPatron("address", "");
                         }}>
                             Поиск
@@ -87,4 +81,5 @@ export default function PatronSearchModal(props) {
         </Modal>
     )
 }
+
 
