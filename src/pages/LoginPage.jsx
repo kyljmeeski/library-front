@@ -16,10 +16,10 @@ export default function LoginPage({ onLoginSuccess }) {
   const navigate = useNavigate();
 
   const validatePassword = (password) => {
-    return password.length >= 4;
+    return password.length >= 6 && /\d/.test(password) && /[A-Z]/.test(password);
   };
 
-  const handleLoginSubmit = async (e) => {
+  const handleLoginSubmit = (e) => {
     e.preventDefault();
     setError('');
     if (username().trim() === '') {
@@ -30,95 +30,30 @@ export default function LoginPage({ onLoginSuccess }) {
       setError('Пароль должен содержать хотя бы 6 символов, цифру и заглавную букву');
       return;
     }
-
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/token/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username(),
-          password: password(),
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('access_token', data.access);
-        localStorage.setItem('refresh_token', data.refresh);
-
-        // Теперь делаем запрос к /users/me, чтобы получить информацию о текущем пользователе
-        const userResponse = await fetch('http://127.0.0.1:8000/users/me/', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${data.access}`, // Используем access_token для авторизации
-          },
-        });
-
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          const role = userData.role; // Предположим, что роль хранится в поле 'role'
-
-          alert('Вход выполнен!');
-          onLoginSuccess(role);
-
-          // Переход на нужную страницу в зависимости от роли
-          if (role === 'librarian') {
-            navigate('/'); // Страница для библиотекаря
-          } else if (role === 'reader') {
-            navigate('/pages/UserDashboard'); // Страница для пользователя
-          } else {
-            setError('Неизвестная роль');
-          }
-        } else {
-          setError('Не удалось получить данные о пользователе');
-        }
-      } else {
-        const data = await response.json();
-        setError(data.detail || 'Неверное имя пользователя или пароль');
-      }
-    } catch (error) {
-      setError('Ошибка при подключении к серверу');
+    if (username() === 'librarian' && password() === 'Lib123') {
+      alert('Вход выполнен как библиотекарь!');
+      onLoginSuccess('librarian');
+      navigate('/');
+    } else if (username() === 'user' && password() === 'User123') {
+      alert('Вход выполнен как пользователь!');
+      onLoginSuccess('user');
+      navigate('/pages/UserDashboard');
+    } else {
+      setError('Неверное имя пользователя или пароль');
     }
   };
 
-  const handleRegisterSubmit = async (e) => {
+  const handleRegisterSubmit = (e) => {
     e.preventDefault();
     setError('');
     if (!validatePassword(regPassword())) {
       setError('Пароль должен содержать хотя бы 6 символов, цифру и заглавную букву');
       return;
     }
-
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/register/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username(),
-          password: regPassword(),
-          first_name: firstName(),
-          last_name: lastName(),
-          email: email(),
-        }),
-      });
-
-      if (response.ok) {
-        alert('Регистрация как читатель завершена!');
-        onLoginSuccess('user');
-        navigate('/pages/UserDashboard'); // Переход на страницу пользователя после регистрации
-      } else {
-        const data = await response.json();
-        setError(data.detail || 'Ошибка регистрации');
-      }
-    } catch (error) {
-      setError('Ошибка при подключении к серверу');
-    }
+    alert('Регистрация как читатель завершена!');
+    onLoginSuccess('user');
+    navigate('/pages/UserDashboard');
   };
-
 
   return (
     <>
