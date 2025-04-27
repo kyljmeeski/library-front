@@ -1,167 +1,185 @@
 import {
   VStack, Heading, Text, Box, SimpleGrid, Button,
-  Table, Thead, Tbody, Tr, Th, Td, Input
+  Table, Thead, Tbody, Tr, Th, Td, Input, IconButton, HStack
 } from "@hope-ui/solid";
-import { createSignal } from "solid-js";
-import { HiOutlineBell } from "solid-icons/hi";
+import { createSignal, onCleanup } from "solid-js";
+import { HiOutlineBell, HiOutlinePencil, HiOutlineTrash } from "solid-icons/hi";
 
-const initialData = [
-  
-];
+// Сигналы для состояния
+const [entries, setEntries] = createSignal([]);
+const [books, setBooks] = createSignal([]);
+const [book, setBook] = createSignal("");
+const [user, setUser] = createSignal("");
+const [wasSubmitted, setWasSubmitted] = createSignal(false);
+const [searchBook, setSearchBook] = createSignal("");
+const [searchUser, setSearchUser] = createSignal("");
 
-const bookTitles = [
-  "Война и мир", "1984", "Мастер и Маргарита", "Преступление и наказание",
-  "Убить пересмешника", "Гордость и предубеждение", "На маяк", "451 градус по Фаренгейту"
-];
+// Получение данных из API (книги)
+const fetchBooks = async () => {
+  try {
+    const response = await fetch('/api/books/');
+    const data = await response.json();
+    setBooks(data);
+  } catch (error) {
+    console.error("Ошибка загрузки книг:", error);
+  }
+};
 
-const usersList = [
-  "Иван Иванов", "Анна Петрова", "Дмитрий Смирнов", "Ольга Сидорова",
-  "Алексей Васильев", "Мария Кузнецова", "Елена Соколова", "Петр Чернов"
-];
+// Форматирование даты
+const formatDate = (val) => {
+  const date = new Date(val);
+  return isNaN(date) ? "Неверная дата" : date.toLocaleDateString("ru-RU");
+};
 
-export default function two() {
-  const [entries, setEntries] = createSignal(
-    initialData.map((entry, i) => ({
-      ...entry,
-      invNumber: String(i + 1).padStart(3, "0"),
-    }))
-  );
+// Добавление месяца к дате
+const addOneMonth = (date) => {
+  const result = new Date(date);
+  result.setMonth(result.getMonth() + 1);
+  return result;
+};
 
-  const [book, setBook] = createSignal("");
-  const [user, setUser] = createSignal("");
-  const [wasSubmitted, setWasSubmitted] = createSignal(false);
-  const [searchBook, setSearchBook] = createSignal("");
-  const [searchUser, setSearchUser] = createSignal("");
+// Проверка на пустое значение
+const isEmpty = (val) => !val?.trim();
 
-  const formatDate = (val) => {
-    const date = new Date(val);
-    return isNaN(date) ? "Неверная дата" : date.toLocaleDateString("ru-RU");
+// Валидация границы ввода
+const getInputBorder = (val) =>
+  wasSubmitted() && isEmpty(val) ? "2px solid red" : undefined;
+
+// Обработчик сохранения записи
+const handleSaveRecord = async () => {
+  setWasSubmitted(true);
+  if (isEmpty(book()) || isEmpty(user())) return;
+
+  const now = new Date();
+  const newRecord = {
+    book: book(),
+    user: user(),
+    takenAt: now,
+    dueDate: addOneMonth(now),
+    returnedAt: null,
+    invNumber: String(entries().length + 1).padStart(3, "0"),
   };
 
-  const addOneMonth = (date) => {
-    const result = new Date(date);
-    result.setMonth(result.getMonth() + 1);
-    return result;
-  };
+  // Отправка данных на сервер
+  try {
+    const response = await fetch('/api/issues/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newRecord),
+    });
 
-  const isEmpty = (val) => !val?.trim();
+    if (response.ok) {
+      setEntries([...entries(), newRecord]); // добавляем запись в локальное состояние
+    } else {
+      console.error("Ошибка при сохранении записи");
+    }
+  } catch (error) {
+    console.error("Ошибка при отправке данных:", error);
+  }
 
-  const getInputBorder = (val) =>
-    wasSubmitted() && isEmpty(val) ? "2px solid red" : undefined;
+  setBook(""); // очищаем поля формы
+  setUser("");
+  setWasSubmitted(false);
+};
 
-  const handleSaveRecord = () => {
-    setWasSubmitted(true);
-    if (isEmpty(book()) || isEmpty(user())) return;
+// Загрузка данных при монтировании компонента
+onCleanup(() => {
+  fetchBooks(); // вызов функции для загрузки данных
+});
 
-    const now = new Date();
-    const newRecord = {
-      book: book(),
-      user: user(),
-      takenAt: now,
-      dueDate: addOneMonth(now),
-      returnedAt: null,
-      invNumber: String(entries().length + 1).padStart(3, "0"),
-    };
+return (
+  <VStack w="$full" px="$7" py="$5" gap="$6" alignItems="start">
+    <Box w="$full" p="$5" bg="white" borderRadius="$md" boxShadow="$sm">
+      <Heading size="md" mb="$4">Добавить новую запись</Heading>
+      <SimpleGrid columns={{ "@initial": 1, "@md": 2 }} gap="$4">
+        <Box>
+          <Text mb="$2" fontSize="sm">Книга</Text>
+          <Input
+            placeholder="Книга"
+            value={searchBook()}
+            onInput={(e) => setSearchBook(e.target.value)}
+            list="books-list"
+            onChange={(e) => setBook(e.target.value)}
+            style={{ border: getInputBorder(book()) }}
+          />
+          <datalist id="books-list">
+            {books().filter(title => title.title.toLowerCase().includes(searchBook().toLowerCase()))
+              .map((title) => (
+                <option value={title.title} key={title.id} />
+              ))}
+          </datalist>
+        </Box>
+        <Box>
+          <Text mb="$2" fontSize="sm">Читатель</Text>
+          <Input
+            placeholder="Читатель"
+            value={searchUser()}
+            onInput={(e) => setSearchUser(e.target.value)}
+            list="users-list"
+            onChange={(e) => setUser(e.target.value)}
+            style={{ border: getInputBorder(user()) }}
+          />
+          <datalist id="users-list">
+            {/* Здесь можно добавить реальные пользователи */}
+            <option value="Иван Иванов" />
+            <option value="Мария Кузнецова" />
+            <option value="Дмитрий Смирнов" />
+          </datalist>
+        </Box>
+      </SimpleGrid>
+      <Button mt="$4" colorScheme="accent" onClick={handleSaveRecord}>
+        Добавить запись
+      </Button>
+    </Box>
 
-    setEntries([...entries(), newRecord]);
-
-    setBook("");
-    setUser("");
-    setWasSubmitted(false);
-  };
-
-  return (
-    <VStack w="$full" px="$7" py="$5" gap="$6" alignItems="start">
-      <Box w="$full" p="$5" bg="white" borderRadius="$md" boxShadow="$sm">
-        <Heading size="md" mb="$4">Добавить новую запись</Heading>
-        <SimpleGrid columns={{ "@initial": 1, "@md": 2 }} gap="$4">
-          <Box>
-            <Text mb="$2" fontSize="sm">Книга</Text>
-            <Input
-              placeholder="Книга"
-              value={searchBook()}
-              onInput={(e) => setSearchBook(e.target.value)}
-              list="books-list"
-              onChange={(e) => setBook(e.target.value)}
-              style={{ border: getInputBorder(book()) }}
-            />
-            <datalist id="books-list">
-              {bookTitles.filter(title => title.toLowerCase().includes(searchBook().toLowerCase()))
-                .map((title) => (
-                  <option value={title} key={title} />
-                ))}
-            </datalist>
-          </Box>
-          <Box>
-            <Text mb="$2" fontSize="sm">Читатель</Text>
-            <Input
-              placeholder="Читатель"
-              value={searchUser()}
-              onInput={(e) => setSearchUser(e.target.value)}
-              list="users-list"
-              onChange={(e) => setUser(e.target.value)}
-              style={{ border: getInputBorder(user()) }}
-            />
-            <datalist id="users-list">
-              {usersList.filter(user => user.toLowerCase().includes(searchUser().toLowerCase()))
-                .map((userName) => (
-                  <option value={userName} key={userName} />
-                ))}
-            </datalist>
-          </Box>
-        </SimpleGrid>
-        <Button mt="$4" colorScheme="accent" onClick={handleSaveRecord}>
-          Добавить запись
-        </Button>
-      </Box>
-
-      <Box w="$md">
-        <Table variant="striped" w="100%" style={{ minWidth: "100%" }}>
-          <Thead>
-            <Tr>
-              <Th>Инв. №</Th>
-              <Th>Книга</Th>
-              <Th>Читатель</Th>
-              <Th>Дата выдачи</Th>
-              <Th>Срок возврата</Th>
-              <Th>Дата возврата</Th>
-              <Th>Статус</Th>
-              <Th></Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {entries().map((entry) => (
-              <Tr key={entry.invNumber}>
-                <Td>{entry.invNumber}</Td>
-                <Td>{entry.book}</Td>
-                <Td>{entry.user}</Td>
-                <Td>{formatDate(entry.takenAt)}</Td>
-                <Td>{formatDate(entry.dueDate)}</Td>
-                <Td>{entry.returnedAt ? formatDate(entry.returnedAt) : "-"}</Td>
-                <Td>
-                  <StatusTag
-                    returnedAt={entry.returnedAt}
-                    dueDate={entry.dueDate}
+    <Box w="$md">
+      <Table variant="striped" w="100%" style={{ minWidth: "100%" }}>
+        <Thead>
+          <Tr>
+            <Th>Инв. №</Th>
+            <Th>Книга</Th>
+            <Th>Читатель</Th>
+            <Th>Дата выдачи</Th>
+            <Th>Срок возврата</Th>
+            <Th>Дата возврата</Th>
+            <Th>Статус</Th>
+            <Th></Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {entries().map((entry) => (
+            <Tr key={entry.invNumber}>
+              <Td>{entry.invNumber}</Td>
+              <Td>{entry.book}</Td>
+              <Td>{entry.user}</Td>
+              <Td>{formatDate(entry.takenAt)}</Td>
+              <Td>{formatDate(entry.dueDate)}</Td>
+              <Td>{entry.returnedAt ? formatDate(entry.returnedAt) : "-"}</Td>
+              <Td>
+                <StatusTag
+                  returnedAt={entry.returnedAt}
+                  dueDate={entry.dueDate}
+                />
+              </Td>
+              <Td>
+                {!entry.returnedAt && (
+                  <Button
+                    size="xs"
+                    colorScheme="accent"
+                    onClick={() => alert(`Напоминание отправлено: ${entry.user}`)}
+                    leftIcon={<HiOutlineBell />}
                   />
-                </Td>
-                <Td>
-                  {!entry.returnedAt && (
-                    <Button
-                      size="xs"
-                      colorScheme="accent"
-                      onClick={() => alert(`Напоминание отправлено: ${entry.user}`)}
-                      leftIcon={<HiOutlineBell />}
-                    />
-                  )}
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </Box>
-    </VStack>
-  );
-}
+                )}
+              </Td>
+            </Tr>
+          ))}
+        </Tbody>
+      </Table>
+    </Box>
+  </VStack>
+);
 
 function StatusTag({ returnedAt, dueDate }) {
   const now = new Date();
@@ -177,5 +195,3 @@ function StatusTag({ returnedAt, dueDate }) {
 
   return <Text color="$orange10" fontWeight="$medium">Выдано</Text>;
 }
-
-

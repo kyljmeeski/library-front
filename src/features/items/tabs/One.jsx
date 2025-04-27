@@ -2,7 +2,7 @@ import {
   VStack, HStack, Heading, Box, SimpleGrid, Button,
   Table, Thead, Tbody, Tr, Th, Td, Input, IconButton, List, ListItem
 } from "@hope-ui/solid";
-import { createSignal, For } from "solid-js";
+import { createSignal, For, onMount } from "solid-js";
 import { HiOutlinePencil, HiOutlineTrash } from "solid-icons/hi";
 
 // Расширенные значения для селектов
@@ -21,12 +21,8 @@ const titlesList = [
   "На маяк", "Братья Карамазовы"
 ];
 
-const initialBooks = [
- 
-];
-
 export default function One() {
-  const [books, setBooks] = createSignal([...initialBooks]);
+  const [books, setBooks] = createSignal([]);
   const [title, setTitle] = createSignal("");
   const [author, setAuthor] = createSignal("");
   const [publisher, setPublisher] = createSignal("");
@@ -53,8 +49,28 @@ export default function One() {
     isbn: false,
   });
 
-  const addBook = () => {
-    // Проверка на незаполненные поля
+  // Загрузка данных при монтировании компонента
+  onMount(async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/books/", {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setBooks(data);
+      } else {
+        console.error("Ошибка при загрузке книг");
+      }
+    } catch (error) {
+      console.error("Ошибка при загрузке данных:", error);
+    }
+  });
+
+  // Добавление книги
+  const addBook = async () => {
     const newErrors = {
       title: !title(),
       author: !author(),
@@ -65,14 +81,11 @@ export default function One() {
       bbk: !bbk(),
       isbn: !isbn(),
     };
-    
     setErrors(newErrors);
 
-    if (Object.values(newErrors).includes(true)) return;  // Если есть ошибки, не добавляем книгу
+    if (Object.values(newErrors).includes(true)) return;
 
-    const generatedInventoryNumber = `INV-${Date.now()}`;
     const newBook = {
-      id: Date.now(),
       title: title(),
       author: author(),
       publisher: publisher(),
@@ -81,40 +94,54 @@ export default function One() {
       bbk: bbk(),
       isbn: isbn(),
       quantity: parseInt(quantity()),
-      inventoryNumber: generatedInventoryNumber,
     };
 
-    setBooks([...books(), newBook]);
+    try {
+      const response = await fetch("http://localhost:8000/api/books/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(newBook),
+      });
 
-    // Очистка полей
-    setTitle(""); setAuthor(""); setPublisher(""); setUdk(""); setDirection(""); setBbk(""); setIsbn(""); setQuantity(1);
-    setSearchTitle("");
-    setSearchAuthor("");
-    setSearchDirection("");
-    setErrors({});  // Сброс ошибок
-  };
+      if (!response.ok) {
+        throw new Error('Ошибка при добавлении книги');
+      }
 
-  const deleteBook = (id) => {
-    setBooks(books().filter((b) => b.id !== id));
-  };
+      const addedBook = await response.json();
+      setBooks([...books(), addedBook]);
 
-  const editBook = (id) => {
-    const book = books().find((b) => b.id === id);
-    if (book) {
-      setTitle(book.title);
-      setAuthor(book.author);
-      setPublisher(book.publisher);
-      setUdk(book.udk);
-      setDirection(book.direction);
-      setBbk(book.bbk);
-      setIsbn(book.isbn);
-      setQuantity(book.quantity);
-      deleteBook(id);
+      // Очистка полей
+      setTitle(""); setAuthor(""); setPublisher(""); setUdk(""); setDirection(""); setBbk(""); setIsbn(""); setQuantity(1);
+      setSearchTitle("");
+      setSearchAuthor("");
+      setSearchDirection("");
+      setErrors({});
+    } catch (error) {
+      console.error("Ошибка при добавлении книги:", error);
     }
   };
 
-  const getInputBorder = (fieldName) => {
-    return errors()[fieldName] ? "2px solid red" : undefined;
+  // Удаление книги
+  const deleteBook = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/books/${id}/`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка при удалении книги');
+      }
+
+      setBooks(books().filter((b) => b.id !== id));
+    } catch (error) {
+      console.error("Ошибка при удалении книги:", error);
+    }
   };
 
   return (
