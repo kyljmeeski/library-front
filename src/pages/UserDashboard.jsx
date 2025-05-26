@@ -25,7 +25,7 @@ export default function UserDashboard() {
   const [cart, setCart] = createSignal([]);
   const [searchTerm, setSearchTerm] = createSignal("");
   const [showCart, setShowCart] = createSignal(false);
-  const [userName, setUserName] = createSignal("Пользователь");
+  const [userName, setUserName] = createSignal("Читатель");
   const [showProfilePopup, setShowProfilePopup] = createSignal(false);
   const [readerForm, setReaderForm] = createSignal({
     fullName: "",
