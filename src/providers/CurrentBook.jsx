@@ -145,27 +145,33 @@ export default function CurrentBookProvider(props) {
     })
 
     const fetchBooks = () => {
-        setStore("books", [])
-       axios.get(window.HOST_ADDRESS + "/books")
-       .then(response => {
-           const books = response.data;
-           for (let i in books) {
-               const book = books[i];
-               const obj = {
-                   id: book.id, 
-                   fields: [], 
-                };
-                book.fields.forEach(item => {
-                    obj["id"] = book.id;
-                    obj["fields"][item.name] = item.value;
-                });
-                setStore("books", [...store["books"], obj]);
-           }
-       })
-       .catch(error => {
-            console.log(error);
-       })
+    setStore("books", []);
+    const token = localStorage.getItem("access_token");
+
+    axios.get(window.HOST_ADDRESS + "/books", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    })
+    .then(response => {
+        const books = response.data;
+        for (let i in books) {
+            const book = books[i];
+            const obj = {
+                id: book.id,
+                fields: [],
+            };
+            book.fields.forEach(item => {
+                obj["fields"][item.name] = item.value;
+            });
+            setStore("books", [...store["books"], obj]);
+        }
+    })
+    .catch(error => {
+        console.log(error);
+    }); 
     }
+
 
 
 

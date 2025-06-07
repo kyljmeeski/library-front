@@ -15,7 +15,7 @@ import Three from "../features/items/tabs/Three";
 
 export default function AppRouter() {
 
-window.HOST_ADDRESS = "http://localhost:8080/api";
+window.HOST_ADDRESS = "http://176.126.164.165:8000/api";
 
 return (
     <Routes>

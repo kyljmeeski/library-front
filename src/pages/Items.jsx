@@ -9,7 +9,7 @@ import ItemPageIntro from "../features/items/itemsPageIntro/ItemPageIntro";
 export default function Items() {
 
     const { fetchBooks } = useContext(CurrentBookContext);
-    const { editingStore, setBookSelected } = useContext(CurrentBookContext);
+    const { editingStore } = useContext(CurrentBookContext);
 
     onMount(() => {
         fetchBooks();

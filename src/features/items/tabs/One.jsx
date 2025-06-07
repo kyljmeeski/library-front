@@ -2,7 +2,7 @@ import {
   VStack, HStack, Heading, Box, SimpleGrid, Button,
   Table, Thead, Tbody, Tr, Th, Td, Input, IconButton, List, ListItem
 } from "@hope-ui/solid";
-import { createSignal, For } from "solid-js";
+import { createSignal, For, onMount } from "solid-js";
 import { HiOutlinePencil, HiOutlineTrash } from "solid-icons/hi";
 
 // Расширенные значения для селектов
@@ -21,11 +21,22 @@ const titlesList = [
   "На маяк", "Братья Карамазовы"
 ];
 
+const BASE_URL = "http://176.126.164.165:8000/";
+const TOKEN = localStorage.getItem('access_token');
+
 const initialBooks = [
  
 ];
 
 export default function One() {
+  const [authors, setAuthors] = createSignal([]);
+  const [directions, setDirections] = createSignal([]);
+  const [publishers, setPublishers] = createSignal([]);
+
+  const [authorId, setAuthorId] = createSignal(0);
+  const [directionId, setDirectionId] = createSignal(0);
+  const [publisherId, setPublisherId] = createSignal(0);
+
   const [books, setBooks] = createSignal([...initialBooks]);
   const [title, setTitle] = createSignal("");
   const [author, setAuthor] = createSignal("");
@@ -36,10 +47,71 @@ export default function One() {
   const [isbn, setIsbn] = createSignal("");
   const [quantity, setQuantity] = createSignal(1);
 
+  onMount(() => {
+    // load authors
+    const loadAuthors = async () => {
+      try {
+        const response = await fetch(BASE_URL + "api/authors", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${TOKEN}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setAuthors(data);
+          console.log(authors());
+        }
+      } catch(error) {
+        console.log(error);
+      }
+    }
+    loadAuthors();
+
+    // load directions
+    const loadDirections = async () => {
+      try {
+        const response = await fetch(BASE_URL + "api/directions", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${TOKEN}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setDirections(data);
+        }
+      } catch(error) {
+        console.log(error);
+      }
+    }
+    loadDirections();
+
+    // load pusblishers
+    const loadPublishers = async () => {
+      try {
+        const response = await fetch(BASE_URL + "api/publishers", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${TOKEN}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setPublishers(data);
+        }
+      } catch(error) {
+        console.log(error);
+      }
+    }
+    loadPublishers();
+  })
+
   // Стейт для поиска
   const [searchTitle, setSearchTitle] = createSignal("");
   const [searchAuthor, setSearchAuthor] = createSignal("");
   const [searchDirection, setSearchDirection] = createSignal("");
+  const [searchPublisher, setSearchPublisher] = createSignal("");
 
   // Стейт для отслеживания ошибок
   const [errors, setErrors] = createSignal({
@@ -84,14 +156,16 @@ export default function One() {
       inventoryNumber: generatedInventoryNumber,
     };
 
-    setBooks([...books(), newBook]);
+    console.log(newBook);
+
+    // setBooks([...books(), newBook]);
 
     // Очистка полей
-    setTitle(""); setAuthor(""); setPublisher(""); setUdk(""); setDirection(""); setBbk(""); setIsbn(""); setQuantity(1);
-    setSearchTitle("");
-    setSearchAuthor("");
-    setSearchDirection("");
-    setErrors({});  // Сброс ошибок
+    // setTitle(""); setAuthor(""); setPublisher(""); setUdk(""); setDirection(""); setBbk(""); setIsbn(""); setQuantity(1);
+    // setSearchTitle("");
+    // setSearchAuthor("");
+    // setSearchDirection("");
+    // setErrors({});  // Сброс ошибок
   };
 
   const deleteBook = (id) => {
@@ -117,6 +191,13 @@ export default function One() {
     return errors()[fieldName] ? "2px solid red" : undefined;
   };
 
+
+
+  const selectAuthor = () => {
+    
+  }
+
+
   return (
     <VStack w="$full" px="$7" py="$5" gap="$6" alignItems="start">
       <Heading size="lg" color="$accent11">Каталог книг</Heading>
@@ -135,11 +216,6 @@ export default function One() {
               onChange={(e) => setTitle(e.target.value)}
               style={{ width: "100%", border: getInputBorder("title") }}
             />
-            <datalist id="titles-list">
-              <For each={titlesList.filter(t => t.toLowerCase().includes(searchTitle().toLowerCase()))}>
-                {(title) => <option value={title} />}
-              </For>
-            </datalist>
           </Box>
 
           <Box mb="$4">
@@ -149,12 +225,16 @@ export default function One() {
               value={searchAuthor()}
               onInput={(e) => setSearchAuthor(e.target.value)}
               list="authors-list"
-              onChange={(e) => setAuthor(e.target.value)}
+              onChange={(e) => {setAuthor(e.target.value); selectAuthor()}}
               style={{ width: "100%", border: getInputBorder("author") }}
             />
             <datalist id="authors-list">
-              <For each={authorsList.filter(a => a.toLowerCase().includes(searchAuthor().toLowerCase()))}>
-                {(author) => <option value={author} />}
+              <For each={
+                authors()
+                  .map(author => `${author.first_name} ${author.last_name}`)
+                  .filter(name => name.toLowerCase().includes(searchDirection().toLowerCase()))
+              }>
+                {(fullName) => <option value={fullName} />}
               </For>
             </datalist>
           </Box>
@@ -164,9 +244,20 @@ export default function One() {
             <Input 
               placeholder="Издательство" 
               value={publisher()} 
-              onInput={(e) => setPublisher(e.target.value)} 
+              onInput={(e) => setSearchPublisher(e.target.value)}
+              list="publishers-list"
+              onChange={(e) => setPublisher(e.target.value)} 
               style={{ border: getInputBorder("publisher") }}
             />
+            <datalist id="publishers-list">
+              <For each={
+                publishers()
+                  .map(publisher => publisher.name)
+                  .filter(name => name.toLowerCase().includes(searchPublisher().toLowerCase()))
+              }>
+                {(fullName) => <option value={fullName} />}
+              </For>
+            </datalist>
           </Box>
 
           <Box mb="$4">
@@ -190,8 +281,12 @@ export default function One() {
               style={{ width: "100%", border: getInputBorder("direction") }}
             />
             <datalist id="directions-list">
-              <For each={directionsList.filter(d => d.toLowerCase().includes(searchDirection().toLowerCase()))}>
-                {(direction) => <option value={direction} />}
+              <For each={
+                directions()
+                  .map(direction => direction.name)
+                  .filter(name => name.toLowerCase().includes(searchAuthor().toLowerCase()))
+              }>
+                {(fullName) => <option value={fullName} />}
               </For>
             </datalist>
           </Box>
