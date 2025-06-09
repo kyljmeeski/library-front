@@ -22,15 +22,12 @@ return (
         <Route path="/">
             <Route path="" element={<Items />} />
         </Route>
-        
         <Route path="/items" element={<Items />}>
             <Route path="" element={<Zero />} />
             <Route path="0" element={<Zero />} />
             <Route path="1" element={<One />} />
             <Route path="2" element={<Two />} />
             <Route path="3" element={<Three />} />
-           
-          
         </Route>
         <Route path="/patrons" element={<Patrons />}>
             <Route path="" element={<Personal />} />

@@ -1,14 +1,18 @@
-import { HStack, IconButton, Input, SimpleOption, SimpleSelect, Text, VStack } from "@hope-ui/solid";
-import { AiOutlineSortAscending, AiOutlineSortDescending } from "solid-icons/ai";
-import { For, Show, useContext } from "solid-js";
-import { ItemEditingContext } from "../../providers/ItemEditingProvider";
+import {HStack, IconButton, Input, SimpleOption, SimpleSelect, Text, VStack} from "@hope-ui/solid";
+import {AiOutlineSortAscending, AiOutlineSortDescending} from "solid-icons/ai";
+import {For, onMount, Show, useContext} from "solid-js";
+import {ItemEditingContext} from "../../providers/ItemEditingProvider";
 import SearchResult from "./SearchResult";
-import { CurrentBookContext } from "../../providers/CurrentBook";
+import {CurrentBookContext} from "../../providers/CurrentBook";
 
 export default function Sidebar() {
 
+    onMount(() => {
+        loadBooks();
+    })
+
     const [state, { setASC }] = useContext(ItemEditingContext);
-    const { store } = useContext(CurrentBookContext);
+    const { store, loadBooks } = useContext(CurrentBookContext);
 
     return (
         <VStack w="300px" h="$full" gap={"$3"}>
@@ -41,7 +45,7 @@ export default function Sidebar() {
                     overflow={"auto"} 
                     h="calc(100vh - 32px - 40px * 3 - 0.75rem * 6)"
                 >
-                <Show when={store.books.length == 0}>
+                <Show when={store.books.length === 0}>
                     <Text w={"$full"} p={"$3"} color={"$blackAlpha10"}>
                         Результатов нет.
                     </Text>

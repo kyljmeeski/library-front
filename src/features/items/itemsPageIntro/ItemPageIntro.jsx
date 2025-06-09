@@ -6,7 +6,7 @@ import useOpen from "../../../hooks/useOpen";
 
 export default function ItemPageIntro() {
 
-    const { setBookSelected, createNewBook } = useContext(CurrentBookContext);
+    const { setBookSelected } = useContext(CurrentBookContext);
     const { open, openPatronTab } = useOpen();
     
     return (
@@ -18,7 +18,7 @@ export default function ItemPageIntro() {
                 Что вы хотите сделать?
             </Heading>
             <HStack w={"$full"} gap={"$6"} justifyContent={"center"}>
-                <ActionCard title="Добавить книги" onClick={() => {open("/items"); openPatronTab("0"); setBookSelected(true); createNewBook()}}/>
+                <ActionCard title="Добавить книги" onClick={() => {open("/items"); openPatronTab("0"); setBookSelected(true);}}/>
                 <ActionCard title="Поиск книг"/>
             </HStack>
             {/* <PatronSearchModal isOpen={isOpen} onClose={onClose}/> */}

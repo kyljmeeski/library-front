@@ -1,52 +1,56 @@
-import { notificationService } from "@hope-ui/solid";
+import {notificationService} from "@hope-ui/solid";
 import axios from "axios";
-import { createContext, createEffect, createSignal } from "solid-js";
-import { createStore } from "solid-js/store";
+import {createContext, createSignal} from "solid-js";
+import {createStore} from "solid-js/store";
+import {fetchBooks} from "../hooks/useFetch";
 
 export const CurrentBookContext = createContext()
 
 export default function CurrentBookProvider(props) {
 
+    const loadBooks = async () => {
+        const books = await fetchBooks();
+        setStore("books", books);
+    }
+
     const [store, setStore] = createStore({
-        books: [], 
+        books: [],
     });
 
     const [editingStore, setEditingStore] = createStore({
-        isBookSelected: false, 
-        isLocked: true, 
-        isCurrentNew: true, 
+        isBookSelected: false,
+        isLocked: true,
+        isCurrentNew: true,
     });
 
     const setBookSelected = (isSelected) => {
         setEditingStore("isBookSelected", isSelected);
-    }
+    };
 
     const setLocked = (isLocked) => {
         setEditingStore("isLocked", isLocked);
-    }
+    };
 
     const [currentBook, setCurrentBook] = createStore({
-        origin: {
-            id: "", 
-            fields: {}
-        }, 
-        updated: {
-            id: "", 
-            fields: {}
-        }, 
-        copies: [], 
-    })
-
-    const [signals, setSignals] = createSignal({});
+        "id": 0,
+        "title": "",
+        "author": "",
+        "direction": "",
+        "publisher": "",
+        "udc": "",
+        "bbk": "",
+        "isbn": "",
+        "quantity": 0
+    });
 
     const [fieldsValidation, setFieldsValidation] = createStore({
-        "001-00": true, 
-        "ind1-100": true, 
-        "ind2-100": true, 
-        "100-a": true, 
-        "ind1-245": true, 
-        "ind2-245": true, 
-        "245-a": true, 
+        "001-00": true,
+        "ind1-100": true,
+        "ind2-100": true,
+        "100-a": true,
+        "ind1-245": true,
+        "ind2-245": true,
+        "245-a": true,
     });
 
     const validateInput = (name, value) => {
@@ -54,7 +58,7 @@ export default function CurrentBookProvider(props) {
             setFieldsValidation(name, value.trim() == "");
         }
     }
-    
+
     const areFieldsValid = () => {
         return (
             fieldsValidation["000-00"] ||
@@ -70,14 +74,15 @@ export default function CurrentBookProvider(props) {
 
     const handleInput = (event) => {
         const { name, value } = event.target;
-        
-        validateInput(name, value);
-        setCurrentBook("updated", "fields", name, value);
+        setCurrentBook(name, value);
 
-        setCurrentBook("origin", {
-            ...currentBook.origin, 
-            fields: {...currentBook.origin.fields}
-        })
+        // validateInput(name, value);
+        // setCurrentBook("updated", "fields", name, value);
+        //
+        // setCurrentBook("origin", {
+        //     ...currentBook.origin,
+        //     fields: {...currentBook.origin.fields}
+        // })
     }
 
     const handleSave = () => {
@@ -86,49 +91,52 @@ export default function CurrentBookProvider(props) {
             axios.post(window.HOST_ADDRESS + "/books", {...currentBook.updated.fields})
             .then(response => {
                 notificationService.show({
-                    status: "success", 
+                    status: "success",
                     title: "Book saved.",
                 });
-                fetchBooks();
                 createNewBook();
             })
             .catch(error => {
                 notificationService.show({
-                    status: "danger", 
-                    title: error.response.data, 
+                    status: "danger",
+                    title: error.response.data,
                 })
             })
         } else {
             axios.put(window.HOST_ADDRESS + "/books/" + currentBook.updated.id, {...currentBook.updated.fields})
             .then(response => {
                 notificationService.show({
-                    status: "success", 
+                    status: "success",
                     title: "Book saved.",
                 })
             })
             .catch(error => {
                 notificationService.show({
-                    status: "danger", 
-                    title: error.response.data, 
+                    status: "danger",
+                    title: error.response.data,
                 })
             })
         }
     }
 
     const selectBook = (book) => {
-        setFieldsValidation("000-00", false);
-        setFieldsValidation("001-00", false);
-        setFieldsValidation("ind1-100", false);
-        setFieldsValidation("ind2-100", false);
-        setFieldsValidation("100-a", false);
-        setFieldsValidation("ind1-245", false);
-        setFieldsValidation("ind2-245", false);
-        setFieldsValidation("245-a", false);
-        setBookSelected(true);
-        setEditingStore("isCurrentNew", false);
-        // setCurrentBook(book);
-        setCurrentBook("origin", book);
-        setCurrentBook("updated", book);
+        setCurrentBook("title", book["title"]);
+        const author = book["authors"]?.[0]
+            ? [
+                book["authors"][0]["first_name"],
+                book["authors"][0]["last_name"],
+                book["authors"][0]["middle_name"],
+            ]
+                .filter(Boolean)
+                .join(" ")
+            : "";
+        setCurrentBook("author", author);
+        setCurrentBook("publisher", book["publisher"]["name"]);
+        setCurrentBook("udc", book["udc"]);
+        setCurrentBook("direction", book["direction"]["name"]);
+        setCurrentBook("bbk", book["bbk"]);
+        setCurrentBook("isbn", book["isbn"]);
+        setCurrentBook("quantity", book["quantity"]);
     }
 
     const createNewBook = () => {
@@ -140,53 +148,6 @@ export default function CurrentBookProvider(props) {
         }
     }
 
-    createEffect(() => {
-        fetchCopies(currentBook.origin.id);
-    })
-
-    const fetchBooks = () => {
-    setStore("books", []);
-    const token = localStorage.getItem("access_token");
-
-    axios.get(window.HOST_ADDRESS + "/books", {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        }
-    })
-    .then(response => {
-        const books = response.data;
-        for (let i in books) {
-            const book = books[i];
-            const obj = {
-                id: book.id,
-                fields: [],
-            };
-            book.fields.forEach(item => {
-                obj["fields"][item.name] = item.value;
-            });
-            setStore("books", [...store["books"], obj]);
-        }
-    })
-    .catch(error => {
-        console.log(error);
-    }); 
-    }
-
-
-
-
-    const fetchCopies = (id) => {
-        console.log("lsk;;;;;;;;;;;;;;;;;;;;;");
-        axios.get(window.HOST_ADDRESS + "/books/" + id + "/items")
-        .then(response => {
-            setCurrentBook("copies", response.data);
-            console.log({...response.data});
-        })
-        .catch(error => {
-            console.log(error);
-        })
-    }
-
     const revert = () => {
         for (let prop in currentBook.updated.fields) {
             setCurrentBook("updated", "fields", prop, currentBook.origin.fields[prop]);
@@ -194,22 +155,20 @@ export default function CurrentBookProvider(props) {
     }
 
     const currentBookState = {
-        signals, 
-        handleInput, 
-        handleSave, 
-        fieldsValidation, 
-        areFieldsValid, 
-        fetchBooks, 
-        selectBook, 
-        store, 
-        currentBook, 
-        editingStore, 
-        setBookSelected, 
-        createNewBook, 
-        revert, 
-        setLocked, 
-        fetchCopies, 
-        setCurrentBook, 
+        loadBooks,
+        handleInput,
+        handleSave,
+        fieldsValidation,
+        areFieldsValid,
+        selectBook,
+        store,
+        currentBook,
+        editingStore,
+        setBookSelected,
+        createNewBook,
+        revert,
+        setLocked,
+        setCurrentBook,
     }
 
     return (

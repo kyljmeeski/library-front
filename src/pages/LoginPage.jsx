@@ -62,7 +62,6 @@ export default function LoginPage({ onLoginSuccess }) {
           const userData = await userResponse.json();
           const role = userData.role; // Предположим, что роль хранится в поле 'role'
 
-          alert('Вход выполнен!');
           onLoginSuccess(role);
 
           // Переход на нужную страницу в зависимости от роли
