@@ -7,9 +7,8 @@ import {
     fetchDirections,
     createAuthor,
     createPublisher,
-    createDirection, updateBook
+    createDirection, updateBook, createBook
 } from "../hooks/useFetch";
-
 export const CurrentBookContext = createContext()
 
 export default function CurrentBookProvider(props) {
@@ -216,30 +215,53 @@ export default function CurrentBookProvider(props) {
      * Обновляет store["books"].
      */
     const handleSave = async () => {
-        if (editingStore.isCurrentNew) {  // создаем новую книгу
-            console.log("new book saved");
-        } else {                          // редактируем уже существующую книгу
-            const author_id = await getAuthorIdByFullName(currentBook["author"]);
-            const publisher_id = await getPublisherIdByName(currentBook["publisher"]);
-            const direction_id = await getDirectionIdByName(currentBook["direction"]);
+        const author_id = await getAuthorIdByFullName(currentBook["author"]);
+        const publisher_id = await getPublisherIdByName(currentBook["publisher"]);
+        const direction_id = await getDirectionIdByName(currentBook["direction"]);
 
-            const updatedBook = await updateBook({
-                "id": currentBook["id"],
-                "author_ids": [
-                    author_id
-                ],
-                "direction_id": direction_id,
-                "publisher_id": publisher_id,
-                "is_deleted": false,
-                "title": currentBook["title"],
-                "udc": currentBook["udc"],
-                "bbk": currentBook["bbk"],
-                "isbn": currentBook["isbn"],
-                "quantity": currentBook["quantity"]
-            });
-            loadBooks();
+        const book = {
+            "author_ids": [
+                author_id
+            ],
+            "direction_id": direction_id,
+            "publisher_id": publisher_id,
+            "is_deleted": false,
+            "title": currentBook["title"],
+            "udc": currentBook["udc"],
+            "bbk": currentBook["bbk"],
+            "isbn": currentBook["isbn"],
+            "quantity": currentBook["quantity"]
+        };
+
+        if (editingStore.isCurrentNew) {  // создаем новую книгу
+            await createBook(book);
+        } else {                          // редактируем уже существующую книгу
+            await updateBook(currentBook["id"], book);
         }
+
+        loadBooks();
     };
+
+    /**
+     * Начинает создавать процесс создания новой книги.
+     * Срабатывает при нажатии кнопки "+" в src/features/items/Header.
+     * Сбрасывает поля в currentBook.
+     * Переключает editingStore["isCurrentNew"] на true.
+     */
+    const handleNewBookSelect = () => {
+        // TODO: улучшить, вдруг будут новые поля
+        setCurrentBook("id", 0);
+        setCurrentBook("title", "");
+        setCurrentBook("author", "");
+        setCurrentBook("publisher", "");
+        setCurrentBook("udc", "");
+        setCurrentBook("direction", "");
+        setCurrentBook("bbk", "");
+        setCurrentBook("isbn", "");
+        setCurrentBook("quantity", 0);
+
+        setEditingStore("isCurrentNew", true);
+    }
 
     /**
      * Выбирает книгу из уже существующих.
@@ -285,7 +307,7 @@ export default function CurrentBookProvider(props) {
     const currentBookState = {
         loadAuthors, loadPublishers, loadDirections, loadBooks,
         handleInput,
-        handleSave,
+        handleSave, handleNewBookSelect,
         fieldsValidation,
         areFieldsValid,
         selectBook,

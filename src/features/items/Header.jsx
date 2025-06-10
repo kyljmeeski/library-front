@@ -7,7 +7,7 @@ import useOpen from "../../hooks/useOpen";
 
 export default function Header() {
 
-    const { editingStore, handleSave, areFieldsValid, setLocked, setBookSelected, createNewBook, revert } = useContext(CurrentBookContext);
+    const { editingStore, handleSave, areFieldsValid, setLocked, handleNewBookSelect, revert } = useContext(CurrentBookContext);
     const { open, openPatronTab } = useOpen();
 
     return (
@@ -16,9 +16,6 @@ export default function Header() {
                 Управление книгами
             </Heading>
             <HStack gap={"$3"}>
-                <Button display={editingStore.isBookSelected ? "none" : "none"} colorScheme={"danger"} onClick={revert}>
-                    Отменить изменения
-                </Button>
                 <Button
                     display={editingStore.isBookSelected ? "block" : "none"}
                     colorScheme={"success"}
@@ -28,7 +25,10 @@ export default function Header() {
                     Сохранить
                 </Button>
                 <IconButton onClick={() => setLocked(!editingStore.isLocked)} backgroundColor={"$accent11"} icon={ editingStore.isLocked ?  <FaSolidLock /> : <FaSolidLockOpen /> } />
-                <IconButton onClick={() => {open("/items"); openPatronTab("0"); setBookSelected(true); createNewBook()}} backgroundColor={"$accent11"} disabled={editingStore.isLocked} icon={<FaSolidPlus />} />
+                <IconButton
+                    backgroundColor={"$accent11"} disabled={editingStore.isLocked} icon={<FaSolidPlus />}
+                    onClick={handleNewBookSelect}
+                />
             </HStack>
         </HStack>
     )

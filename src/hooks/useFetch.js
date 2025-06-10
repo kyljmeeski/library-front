@@ -165,9 +165,9 @@ export const createDirection = async (name) => {
     }
 };
 
-export const updateBook = async (book) => {
+export const updateBook = async (id, book) => {
     try {
-        const response = await fetch(BASE_URL + `api/books/${book["id"]}/`, {
+        const response = await fetch(BASE_URL + `api/books/${id}/`, {
             method: "PUT",
             headers: {
                 "Authorization": `Bearer ${TOKEN}`,
@@ -184,6 +184,29 @@ export const updateBook = async (book) => {
         }
     } catch (error) {
         console.log("Error while updating book: " + error);
+        return {};
+    }
+};
+
+export const createBook = async (book) => {
+    try {
+        const response = await fetch(BASE_URL + "api/books/", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(book)
+        });
+        if (response.ok) {
+            return await response.json();
+        } else {
+            const error = await response.text();
+            console.log("Error while creating new book: " + error);
+            return {};
+        }
+    } catch (error) {
+        console.log("Error while create new book: " + error);
         return {};
     }
 };
