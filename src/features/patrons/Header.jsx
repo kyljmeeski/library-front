@@ -11,7 +11,7 @@ export default function Header() {
 
     const { open, openPatronTab } = useOpen();
 
-    const [ currentPatronState, { handleSave, revert, createNewPatron }] = useContext(CurrentPatronContext);
+    const [ currentPatronState, { handleSave, areFieldsValid, createNewPatron }] = useContext(CurrentPatronContext);
 
     return (
         <HStack justifyContent={"space-between"} w={"$full"}>
@@ -19,10 +19,12 @@ export default function Header() {
                 Управление читателями
             </Heading>
             <HStack gap={"$3"}>
-                <Button display={state.isEditing ? "block" : "none"} colorScheme={"danger"} onClick={revert}>
-                    Отменить 
-                </Button>
-                <Button display={state.isEditing ? "block" : "none"} colorScheme={"success"} disabled={!state.isReadyToSave} onClick={handleSave}>
+                <Button
+                    display={state.isEditing ? "block" : "none"}
+                    colorScheme={"success"}
+                    disabled={!areFieldsValid()}
+                    onClick={handleSave}
+                >
                     Сохранить
                 </Button>
                 <IconButton onClick={() => setLocked(!state.isLocked)} backgroundColor={"$accent11"} icon={ state.isLocked ?  <FaSolidLock /> : <FaSolidLockOpen /> } />

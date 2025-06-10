@@ -10,8 +10,13 @@ import { CurrentPatronContext } from "../../providers/CurrentPatron";
 export default function Sidebar() {
 
     const [state, { setASC }] = useContext(PatronEditingContext);
-    const [currentPatronState] = useContext(CurrentPatronContext);
+    const [currentPatronState, {store, loadReaders}] = useContext(CurrentPatronContext);
     const [{ isOpen, onOpen, onClose }] = useContext(ModalContext);
+
+    onMount(() => {
+        loadReaders();
+        console.log(store["readers"]);
+    })
 
     return (
         <VStack w="300px" h="$full" gap={"$3"}>

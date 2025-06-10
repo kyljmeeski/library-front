@@ -211,3 +211,43 @@ export const createBook = async (book) => {
     }
 };
 
+
+
+export const fetchReaders = async () => {
+    try {
+        const response = await fetch(BASE_URL + "api/users", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`
+            }
+        });
+        if (response.ok) {
+            const users = await response.json();
+            return users.filter((user) => user["role"] === "reader");
+        } else {
+            const error = await response.text();
+            console.log("Error while fetching readers: " + error);
+            return [];
+        }
+    } catch (error) {
+        console.log("Error while fetching readers: " + error);
+        return [];
+    }
+};
+
+export const createReader = async (reader) => {
+    try {
+        return await fetch(BASE_URL + "api/users/", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(reader)
+        });
+    } catch (error) {
+        console.log("Error while create new reader: " + error);
+        return {};
+    }
+};
+

@@ -4,6 +4,7 @@ import { InputValidationContext } from "./InputValidationProvider";
 import { PatronEditingContext } from "./PatronEditingProvider";
 import axios from "axios";
 import { notificationService } from "@hope-ui/solid";
+import {createReader, fetchReaders} from "../hooks/useFetch";
 
 export const CurrentPatronContext = createContext();
 
@@ -80,57 +81,8 @@ export default function CurrentPatronProvider(props) {
         patrons: [], 
     });
 
-    const handleInput = (e) => {
-        validateInput(e.currentTarget.name, e.currentTarget.value);
-        setState("newPatron", e.currentTarget.name, e.currentTarget.value);
-    }
-
     const handleSelect = (name, value) => {
         setState("newPatron", name, value);
-    }
-
-    const handleSave = () => {
-        console.log(state.isCurrentPatronNew);
-        if (state.isCurrentPatronNew) {
-            axios.post(window.HOST_ADDRESS + "/patrons", { ...state.newPatron })
-            .then(response => {
-                console.log(response);
-                notificationService.show({
-                    status: "success", 
-                    title: "Patron created!"
-                });
-                setState("currentPatron", state.newPatron);
-                fetchPatrons();
-                createNewPatron();
-            })
-            .catch(error => {
-                notificationService.show({
-                    status: "danger", 
-                    title: error.response.data.message, 
-                });
-            });
-        } else if (!state.isCurrentPatronNew) {
-            const { studentNumber, ...patronToBeUpdated } = state.newPatron;
-            axios.put(window.HOST_ADDRESS + "/patrons/" + state.newPatron.studentNumber, patronToBeUpdated)
-            .then(response => {
-                console.log(response);
-                notificationService.show({
-                    status: "success", 
-                    title: "Patron updated!"
-                });
-                setState("currentPatron", state.newPatron);
-                fetchPatrons();
-                selectPatron(patronToBeUpdated);
-                
-            })
-            .catch(error => {
-                console.log(error);
-                notificationService.show({
-                    status: "danger", 
-                    title: "Error!"
-                });
-            });
-        }
     }
 
     const revert = () => {
@@ -144,13 +96,7 @@ export default function CurrentPatronProvider(props) {
     }
 
     const fetchPatrons = () => {
-        axios.get(window.HOST_ADDRESS + "/patrons")
-        .then(response => {
-            setState("patrons", response.data);
-        })
-        .catch(error => {
-            console.log(error);
-        });
+
     }
 
     const createNewPatron = () => {
@@ -234,10 +180,103 @@ export default function CurrentPatronProvider(props) {
         );
     }
 
+
+
+    const [store, setStore] = createStore({
+        "readers": []
+    });
+
+    const [editingStore, setEditingStore] = createStore({
+        "isCurrentReaderNew": false
+    });
+
+    const [currentReader, setCurrentReader] = createStore({
+        "first_name": "",
+        "middle_name": "",
+        "last_name": "",
+        "username": "",
+        "birth_date": "",
+        "passport": "",
+        "email": "",
+        "phone": "",
+        "address": "",
+        "role": "reader"
+    });
+
+    const [errors, setErrors] = createStore({
+        "first_name": "",
+        "middle_name": "",
+        "last_name": "",
+        "username": "",
+        "birth_date": "",
+        "passport": "",
+        "email": "",
+        "phone": "",
+        "address":""
+    })
+
+    const [areFieldsValid, setAreFieldsValid] = createSignal(false);
+
+    const loadReaders = async () => {
+        const readers = await fetchReaders();
+        setStore("readers", readers);
+    };
+
+    createEffect(() => {
+        const isUsernameValid =
+            currentReader["username"] !== null &&
+            currentReader["username"] !== undefined &&
+            currentReader["username"].trim() !== ""
+        ;
+        const isEmailValid = !currentReader["email"] || currentReader["email"].trim() === ""
+            ? true
+            : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentReader["email"].trim())
+        ;
+        const isPassportValid = /^[A-Za-z]{2}\d{6}$/.test(currentReader["passport"].trim());
+
+
+        setAreFieldsValid(isUsernameValid && isEmailValid && isPassportValid);
+    });
+
+    const handleInput = (event) => {
+        const { name, value } = event.target;
+        setCurrentReader(name, value);
+    };
+
+    const nonEmpty = (obj) => {
+        const filteredObj = Object.fromEntries(
+            Object.entries(obj).filter(([_, value]) =>
+                value !== undefined &&
+                value !== null &&
+                value !== "" &&
+                !(Array.isArray(value) && value.length === 0) &&
+                !(typeof value === "object" && value !== null && Object.keys(value).length === 0)
+            )
+        );
+        return filteredObj;
+    }
+
+    const handleSave = async () => {
+        const response = await createReader(nonEmpty(currentReader));
+        if (response.status === 400) {
+            console.log(await response.json());
+        }
+    }
+
+
+
+
+
     const currentPatron = [
         state, 
         {
-            handleInput, 
+            store,
+            loadReaders,
+            currentReader,
+            areFieldsValid,
+            errors,
+            handleInput,
+
             handleSave, 
             handleSelect, 
             revert, 

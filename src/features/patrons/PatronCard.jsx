@@ -1,9 +1,8 @@
-import { Button, HStack, VStack } from "@hope-ui/solid";
-import { useContext } from "solid-js";
-import GeneralInfo from "./patronCard/GeneralInfo";
-import { Outlet } from "@solidjs/router";
+import {Button, HStack, VStack} from "@hope-ui/solid";
+import {useContext} from "solid-js";
+import {Outlet} from "@solidjs/router";
 import useOpen from "../../hooks/useOpen";
-import { CurrentPageContext } from "../../providers/CurrentPageProvider";
+import {CurrentPageContext} from "../../providers/CurrentPageProvider";
 
 export default function PatronCard() {
     const [state] = useContext(CurrentPageContext);
@@ -15,7 +14,6 @@ export default function PatronCard() {
 
     return (
         <VStack w={"$full"} h={"calc(100vh - 32px - 40px - 0.75rem * 5)"} gap={"$3"}>
-            <GeneralInfo />
             <VStack w={"$full"} backgroundColor={"white"} flexGrow={"1"} h={"calc(100vh - 32px - 40px * 3 - 224px - 0.75rem * 3)"} overflowY={"auto"}>
                 <HStack justifyContent={"start"} w={"$full"}>
                     {["personal", "access", "notes", "statistics"].map(tab => (

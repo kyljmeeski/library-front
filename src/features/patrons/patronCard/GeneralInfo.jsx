@@ -12,8 +12,7 @@ export default function GeneralInfo() {
        
     return (
         <HStack w={"$full"} justifyContent={"space-between"} gap={"$3"} backgroundColor={"white"} p={"$3"}>
-            <Image src="https://fakeimg.pl/155x200" h={"200px"} w={"155px"} fit="cover" />
-            <VStack w={"$full"} alignItems={"start"}>  
+            <VStack w={"$full"} alignItems={"start"}>
                 <HStack w={"$full"} gap={"$1"}>
                     <VStack alignItems={"start"} flex={"1"}>
                         <label for="firstName">Имя</label>
@@ -68,27 +67,6 @@ export default function GeneralInfo() {
                             backgroundColor={"$blackAlpha5"}
                             value={state.newPatron.studentNumber}
                         />
-                    </VStack>
-                </HStack>
-
-                <HStack w={"$full"} gap={"$1"}>
-                    <VStack alignItems={"start"} flex={"1"}>
-                        <label for="status">
-                            Статус
-                        </label>
-                        <SimpleSelect
-                            onClick={() => setEditing(true)}
-                            disabled={patronEditingState.isLocked}
-                            placeholder="Выбрать"
-                            onChange={(value) => handleSelect("status", value)}
-                            id="status"
-                            backgroundColor={"$blackAlpha5"}
-                            value={state.newPatron.status}
-                        >
-                            <SimpleOption value={"ACTIVE"}>
-                                Активен
-                            </SimpleOption>
-                        </SimpleSelect>
                     </VStack>
                 </HStack>
             </VStack>

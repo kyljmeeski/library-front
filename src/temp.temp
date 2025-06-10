@@ -1,0 +1,8 @@
+ id |                                         password                                         | last_login | is_superuser |  username  | first_name | last_name  |   email   | is_staff | is_active |          date_joined | middle_name | birth_date | passport |     phone     | address |   role
+----+------------------------------------------------------------------------------------------+------------+--------------+------------+------------+------------+-----------+----------+-----------+------------------------------
+-+-------------+------------+----------+---------------+---------+-----------
+  1 | pbkdf2_sha256$870000$jPR1taS4j3x2KOI3MR7qQ5$/Xg5wNS28HIQv/hCaAq8W2POLoVHcvkpte+xh4z9pdY= |            | f            | librarian  | Светлана   | Васильевна | a@mail.ru | f        | t         | 2025-06-07 15:35:16.791752+06
+ |             | 1996-11-11 | AN123456 | +996708487654 | вапрол  | librarian
+  2 | !uhvGizqYAQhGXrttrra7t17EOqiwZvLwHnsj6Aml                                                |            | f            | username_1 |            |            |           | f        | t         | 2025-06-10 16:14:04.710348+06
+ |             |            |          |               |         | reader
+(2 rows)
