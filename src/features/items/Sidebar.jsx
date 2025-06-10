@@ -9,10 +9,13 @@ export default function Sidebar() {
 
     onMount(() => {
         loadBooks();
+        loadAuthors();
+        loadPublishers();
+        loadDirections();
     })
 
     const [state, { setASC }] = useContext(ItemEditingContext);
-    const { store, loadBooks } = useContext(CurrentBookContext);
+    const { store, loadBooks, loadAuthors, loadPublishers, loadDirections } = useContext(CurrentBookContext);
 
     return (
         <VStack w="300px" h="$full" gap={"$3"}>

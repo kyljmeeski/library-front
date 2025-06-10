@@ -23,7 +23,7 @@ export default function Header() {
                     display={editingStore.isBookSelected ? "block" : "none"}
                     colorScheme={"success"}
                     onClick={handleSave}
-                    disabled={!areFieldsValid}
+                    disabled={!areFieldsValid()}
                 >
                     Сохранить
                 </Button>

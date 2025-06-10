@@ -1,26 +1,59 @@
-import {notificationService} from "@hope-ui/solid";
-import axios from "axios";
 import {createContext, createEffect, createSignal} from "solid-js";
 import {createStore} from "solid-js/store";
-import {fetchBooks} from "../hooks/useFetch";
+import {fetchBooks, fetchAuthors, fetchPublishers, fetchDirections} from "../hooks/useFetch";
 
 export const CurrentBookContext = createContext()
 
 export default function CurrentBookProvider(props) {
 
+    /**
+     * Стягивает все книги, сохраняет их в store.
+     * Срабатывает onMount src/features/items/Sidebar.
+     */
     const loadBooks = async () => {
         const books = await fetchBooks();
         setStore("books", books);
     }
 
+    /**
+     * Стягивает все издательства, сохраняет их в store.
+     * Срабатывает onMount src/features/items/Sidebar.
+     */
+    const loadPublishers = async () => {
+        const publishers = await fetchPublishers();
+        setStore("publishers", publishers);
+    }
+
+    /**
+     * Стягивает все направления, сохраняет их в store.
+     * Срабатывает onMount src/features/items/Sidebar.
+     */
+    const loadDirections = async () => {
+        const directions = await fetchDirections();
+        setStore("directions", directions);
+    }
+
+    /**
+     * Стягивает всех авторов, сохраняет их в store.
+     * Срабатывает onMount src/features/items/Sidebar.
+     */
+    const loadAuthors = async () => {
+        const authors = await fetchAuthors();
+        setStore("authors", authors);
+        console.log(store["authors"]);
+    }
+
     const [store, setStore] = createStore({
+        authors: [],
+        publishers: [],
+        directions: [],
         books: [],
     });
 
     const [editingStore, setEditingStore] = createStore({
         isBookSelected: false,
         isLocked: true,
-        isCurrentNew: true,
+        isCurrentNew: false,   // Если true -- создаем новую книгу, если false -- редактируем уже существующую
     });
 
     const setBookSelected = (isSelected) => {
@@ -64,17 +97,18 @@ export default function CurrentBookProvider(props) {
         "245-a": true,
     });
 
-    const validateInput = (name, value) => {
-        if (["000-00", "001-00", "ind1-100", "ind2-100", "100-a", "ind1-245", "ind2-245", "245-a"].includes(name)) {
-            setFieldsValidation(name, value.trim() === "");
-        }
-    }
-
     const [areFieldsValid, setAreFieldsValid] = createSignal(false);
 
     createEffect(() => {
-        const valid = !Object.values(errors).some(v => v === false);
-        console.log("valid: " + valid);
+        const valid =
+            !errors.title &&
+            !errors.author &&
+            !errors.publisher &&
+            !errors.direction &&
+            !errors.udc &&
+            !errors.bbk &&
+            !errors.isbn &&
+            !errors.quantity;
         setAreFieldsValid(valid);
     });
 
@@ -83,41 +117,27 @@ export default function CurrentBookProvider(props) {
         setCurrentBook(name, value);
     }
 
+    /**
+     * Сохраняет книгу.
+     * Срабатывает при нажатии кнопки "Сохранить" в src/features/items/Header.
+     * Сохраняет либо отредактированную существующую книгу, либо новую.
+     */
     const handleSave = () => {
-        if (editingStore.isCurrentNew) {
-            console.log(window.HOST_ADDRESS + "/books" + {...currentBook.updated.id});
-            axios.post(window.HOST_ADDRESS + "/books", {...currentBook.updated.fields})
-            .then(response => {
-                notificationService.show({
-                    status: "success",
-                    title: "Book saved.",
-                });
-                createNewBook();
-            })
-            .catch(error => {
-                notificationService.show({
-                    status: "danger",
-                    title: error.response.data,
-                })
-            })
-        } else {
-            axios.put(window.HOST_ADDRESS + "/books/" + currentBook.updated.id, {...currentBook.updated.fields})
-            .then(response => {
-                notificationService.show({
-                    status: "success",
-                    title: "Book saved.",
-                })
-            })
-            .catch(error => {
-                notificationService.show({
-                    status: "danger",
-                    title: error.response.data,
-                })
-            })
+        if (editingStore.isCurrentNew) {  // создаем новую книгу
+            console.log("new book saved");
+        } else {                          // редактируем уже существующую книгу
+            let author_id, publisher_id, direction_id;
+
+            console.log("edited book saved");
         }
     }
 
+    /**
+     * Выбирает книгу из уже существующих.
+     * Срабатывает при выборе одной из src/features/items/SearchResult в src/features/items/Sidebar.
+     */
     const selectBook = (book) => {
+        setEditingStore("isCurrentNew", false);     // Идет редактирование уже существующей книги
         setCurrentBook("id", book["id"]);
         setCurrentBook("title", book["title"]);
         const author = book["authors"]?.[0]
@@ -154,7 +174,7 @@ export default function CurrentBookProvider(props) {
     }
 
     const currentBookState = {
-        loadBooks,
+        loadAuthors, loadPublishers, loadDirections, loadBooks,
         handleInput,
         handleSave,
         fieldsValidation,
