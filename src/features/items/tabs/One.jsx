@@ -5,30 +5,18 @@ import {createStore} from "solid-js/store";
 
 export default function One() {
 
-  const { currentBook, editingStore, handleInput } = useContext(CurrentBookContext);
-
-  const [errors, setErrors] = createStore({
-    "title": false,
-    "author": false,
-    "publisher": false,
-    "udc": false,
-    "direction": false,
-    "bbk": false,
-    "isbn": false,
-    "quantity": false,
-  });
+  const { currentBook, editingStore, handleInput, errors, setErrors } = useContext(CurrentBookContext);
 
   createEffect(() => {
-    // Author should contain either 1 space, if only first_name and last_name is present
-    // or 2 spaces, if first_name, last_name and middle_name
-    const authorNameParts = currentBook["author"].trim().split(" ");
-    const isAuthorInvalid = authorNameParts.length < 1 || authorNameParts.length > 2
-
     setErrors("title", !currentBook["title"]);
-    setErrors("author", !currentBook["title"]);
     setErrors("publisher", !currentBook["publisher"]);
     setErrors("direction", !currentBook["direction"]);
     setErrors("quantity", !currentBook["quantity"] || currentBook["quantity"] < 0);
+
+    // Author should have either: first_name, last_name or first_name, last_name, middle_name
+    const authorNameParts = currentBook["author"].trim().split(" ");
+    const isAuthorValid = authorNameParts.length === 2 || authorNameParts.length === 3
+    setErrors("author", !isAuthorValid);
   });
 
   return (
@@ -58,6 +46,8 @@ export default function One() {
               placeholder="Автор"
               value={currentBook["author"]}
               disabled={editingStore.isLocked}
+              onInput={(e) => handleInput(e)}
+              invalid={errors["author"]}
             />
           </Box>
 
@@ -68,6 +58,8 @@ export default function One() {
               placeholder="Издательство"
               value={currentBook["publisher"]}
               disabled={editingStore.isLocked}
+              onInput={(e) => handleInput(e)}
+              invalid={errors["publisher"]}
             />
           </Box>
 
@@ -78,6 +70,7 @@ export default function One() {
               placeholder="УДК"
               value={currentBook["udc"]}
               disabled={editingStore.isLocked}
+              onInput={(e) => handleInput(e)}
             />
           </Box>
 
@@ -88,6 +81,8 @@ export default function One() {
               placeholder="Направление"
               value={currentBook["direction"]}
               disabled={editingStore.isLocked}
+              onInput={(e) => handleInput(e)}
+              invalid={errors["direction"]}
             />
           </Box>
 
@@ -98,6 +93,7 @@ export default function One() {
               placeholder="ББК"
               value={currentBook["bbk"]}
               disabled={editingStore.isLocked}
+              onInput={(e) => handleInput(e)}
             />
           </Box>
 
@@ -108,6 +104,8 @@ export default function One() {
               placeholder="ISBN"
               value={currentBook["isbn"]}
               disabled={editingStore.isLocked}
+              onInput={(e) => handleInput(e)}
+              invalid={errors["isbn"]}
             />
           </Box>
 
@@ -120,6 +118,8 @@ export default function One() {
               min="1"
               placeholder="Количество"
               disabled={editingStore.isLocked}
+              onInput={(e) => handleInput(e)}
+              invalid={errors["quantity"]}
             />
           </Box>
 

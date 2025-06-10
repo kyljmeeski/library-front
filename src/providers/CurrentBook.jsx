@@ -1,6 +1,6 @@
 import {notificationService} from "@hope-ui/solid";
 import axios from "axios";
-import {createContext, createSignal} from "solid-js";
+import {createContext, createEffect, createSignal} from "solid-js";
 import {createStore} from "solid-js/store";
 import {fetchBooks} from "../hooks/useFetch";
 
@@ -43,6 +43,17 @@ export default function CurrentBookProvider(props) {
         "quantity": 0
     });
 
+    const [errors, setErrors] = createStore({
+        "title": false,
+        "author": false,
+        "publisher": false,
+        "udc": false,
+        "direction": false,
+        "bbk": false,
+        "isbn": false,
+        "quantity": false,
+    });
+
     const [fieldsValidation, setFieldsValidation] = createStore({
         "001-00": true,
         "ind1-100": true,
@@ -55,34 +66,21 @@ export default function CurrentBookProvider(props) {
 
     const validateInput = (name, value) => {
         if (["000-00", "001-00", "ind1-100", "ind2-100", "100-a", "ind1-245", "ind2-245", "245-a"].includes(name)) {
-            setFieldsValidation(name, value.trim() == "");
+            setFieldsValidation(name, value.trim() === "");
         }
     }
 
-    const areFieldsValid = () => {
-        return (
-            fieldsValidation["000-00"] ||
-            fieldsValidation["001-00"] ||
-            fieldsValidation["ind1-100"] ||
-            fieldsValidation["ind2-100"] ||
-            fieldsValidation["100-a"] ||
-            fieldsValidation["ind1-245"] ||
-            fieldsValidation["ind2-245"] ||
-            fieldsValidation["245-a"]
-        )
-    }
+    const [areFieldsValid, setAreFieldsValid] = createSignal(false);
+
+    createEffect(() => {
+        const valid = !Object.values(errors).some(v => v === false);
+        console.log("valid: " + valid);
+        setAreFieldsValid(valid);
+    });
 
     const handleInput = (event) => {
         const { name, value } = event.target;
         setCurrentBook(name, value);
-
-        // validateInput(name, value);
-        // setCurrentBook("updated", "fields", name, value);
-        //
-        // setCurrentBook("origin", {
-        //     ...currentBook.origin,
-        //     fields: {...currentBook.origin.fields}
-        // })
     }
 
     const handleSave = () => {
@@ -120,6 +118,7 @@ export default function CurrentBookProvider(props) {
     }
 
     const selectBook = (book) => {
+        setCurrentBook("id", book["id"]);
         setCurrentBook("title", book["title"]);
         const author = book["authors"]?.[0]
             ? [
@@ -163,6 +162,7 @@ export default function CurrentBookProvider(props) {
         selectBook,
         store,
         currentBook,
+        errors, setErrors,
         editingStore,
         setBookSelected,
         createNewBook,

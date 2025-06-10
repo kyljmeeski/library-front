@@ -7,7 +7,6 @@ import useOpen from "../../hooks/useOpen";
 
 export default function Header() {
 
-    const [state] = useContext(ItemEditingContext);
     const { editingStore, handleSave, areFieldsValid, setLocked, setBookSelected, createNewBook, revert } = useContext(CurrentBookContext);
     const { open, openPatronTab } = useOpen();
 
@@ -20,7 +19,12 @@ export default function Header() {
                 <Button display={editingStore.isBookSelected ? "none" : "none"} colorScheme={"danger"} onClick={revert}>
                     Отменить изменения
                 </Button>
-                <Button display={editingStore.isBookSelected ? "block" : "none"} colorScheme={"success"} onClick={handleSave} disabled={areFieldsValid()}>
+                <Button
+                    display={editingStore.isBookSelected ? "block" : "none"}
+                    colorScheme={"success"}
+                    onClick={handleSave}
+                    disabled={!areFieldsValid}
+                >
                     Сохранить
                 </Button>
                 <IconButton onClick={() => setLocked(!editingStore.isLocked)} backgroundColor={"$accent11"} icon={ editingStore.isLocked ?  <FaSolidLock /> : <FaSolidLockOpen /> } />
