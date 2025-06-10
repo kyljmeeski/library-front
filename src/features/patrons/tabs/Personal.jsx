@@ -71,14 +71,21 @@ export default function Personal() {
                         onInput={(e) => handleInput(e)}
                         id="username"
                         value={currentReader["username"]}
+                        invalid={errors["username"].trim() !== ""}
                     />
+                    <Text
+                        when={errors["username"].trim() !== ""}
+                        color="red"
+                    >
+                        {errors["username"]}
+                    </Text>
                 </VStack>
             </VStack>
 
             {/* Идентификаторы */}
             <VStack w={"$full"} alignItems={"start"} gap={"$3"}>
                 <Heading color={"$accent11"}>Идентификаторы</Heading>
-                <HStack w={"$full"} justifyContent={"start"} gap={"$3"}>
+                <HStack w={"$full"} justifyContent={"start"} alignItems={"start"} gap={"$3"}>
                     <VStack alignItems={"start"} flexBasis={"calc(100%/3)"}>
                         <label for="birth_date">Дата рождения</label>
                         <Input
@@ -101,9 +108,11 @@ export default function Personal() {
                             id="passport"
                             placeholder="ID1234567"
                             value={currentReader["passport"]}
+                            invalid={errors["passport"].trim() !== ""}
                         />
                         <Text
                             when={errors["passport"].trim() !== ""}
+                            color="red"
                         >
                             {errors["passport"]}
                         </Text>
@@ -135,6 +144,7 @@ export default function Personal() {
                         <InputGroup>
                             <InputLeftAddon>+996</InputLeftAddon>
                             <Input
+                                maxLength="9"
                                 onClick={() => setEditing(true)}
                                 disabled={patronEditingState.isLocked}
                                 name="phone"

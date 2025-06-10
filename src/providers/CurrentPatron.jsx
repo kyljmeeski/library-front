@@ -233,9 +233,9 @@ export default function CurrentPatronProvider(props) {
             : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentReader["email"].trim())
         ;
         const isPassportValid = /^[A-Za-z]{2}\d{6}$/.test(currentReader["passport"].trim());
+        const isPhoneValid = /^\d{9}$/.test(currentReader["phone"].trim());
 
-
-        setAreFieldsValid(isUsernameValid && isEmailValid && isPassportValid);
+        setAreFieldsValid(isUsernameValid && isEmailValid && isPassportValid && isPhoneValid);
     });
 
     const handleInput = (event) => {
@@ -257,10 +257,25 @@ export default function CurrentPatronProvider(props) {
     }
 
     const handleSave = async () => {
+        setCurrentReader("phone", (prev) => `+996${prev}`);
         const response = await createReader(nonEmpty(currentReader));
         if (response.status === 400) {
-            console.log(await response.json());
+            // TODO: найти способ получше, поля могут меняться
+            setErrors("last_name", "");
+            setErrors("first_name", "");
+            setErrors("middle_name", "");
+            setErrors("username", "");
+            setErrors("birth_date", "");
+            setErrors("passport", "");
+            setErrors("email", "");
+            setErrors("phone", "");
+            setErrors("address", "");
+            const body = await response.json();
+            for (let key in body) {
+                setErrors(key, body[key]?.[0]);
+            }
         }
+        console.log(errors);
     }
 
 
