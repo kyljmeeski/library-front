@@ -84,3 +84,31 @@ export const fetchDirections = async () => {
         return [];
     }
 };
+
+export const createAuthor = async (first_name, last_name, middle_name) => {
+    try {
+        const response = await fetch(BASE_URL + "api/authors/", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "is_deleted": false,
+                "first_name": first_name,
+                "last_name": last_name,
+                "middle_name": middle_name
+            })
+        });
+        if (response.ok) {
+            return await response.json();
+        } else {
+            const error = await response.text();
+            console.log("Error while creating author: " + error);
+            return {};
+        }
+    } catch (error) {
+        console.log("Error while creating author: " + error);
+        return {};
+    }
+};

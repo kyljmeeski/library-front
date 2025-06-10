@@ -1,6 +1,6 @@
 import {createContext, createEffect, createSignal} from "solid-js";
 import {createStore} from "solid-js/store";
-import {fetchBooks, fetchAuthors, fetchPublishers, fetchDirections} from "../hooks/useFetch";
+import {fetchBooks, fetchAuthors, fetchPublishers, fetchDirections, createAuthor} from "../hooks/useFetch";
 
 export const CurrentBookContext = createContext()
 
@@ -118,15 +118,52 @@ export default function CurrentBookProvider(props) {
     }
 
     /**
+     * Возвращает id автора.
+     * Вызывается при сохранении книги в handleSave (в этом же файле).
+     * Принимает полное имя автора.
+     * Полное имя может состоять из имени и фамилии или из имени, фамилии и отчества (именно в таком порядке).
+     * Если в store["authors"] уже есть подходящий автор, возвращает его id.
+     * Если нет, создаем новый, обновляем store["authors"] возвращаем id уже нового автора.
+     */
+    const getAuthorIdByFullName = async (fullName) => {
+        const parts = fullName.trim().split(" ");
+
+        if (parts.length !== 2 && parts.length !== 3) {
+            console.log("Wrong full name");  // но это скорее всего не произойдет, потому что кнопка не будет кликабельна
+            return null;
+        }
+
+        const [first_name, last_name, middle_name = ""] = parts;
+
+        const matched = store["authors"].find((a) =>
+            a["first_name"] === first_name &&
+            a["last_name"] === last_name &&
+            (a["middle_name"] || "") === middle_name
+        );
+
+        if (matched) {
+            // автор уже существует
+            return matched["id"];
+        }
+
+        // создаем нового автора
+        const author = await createAuthor(first_name, last_name, middle_name);
+        setStore("authors", (prev) => [...prev, author]);
+
+        return await author["id"];
+    }
+
+    /**
      * Сохраняет книгу.
      * Срабатывает при нажатии кнопки "Сохранить" в src/features/items/Header.
      * Сохраняет либо отредактированную существующую книгу, либо новую.
      */
-    const handleSave = () => {
+    const handleSave = async () => {
         if (editingStore.isCurrentNew) {  // создаем новую книгу
             console.log("new book saved");
         } else {                          // редактируем уже существующую книгу
-            let author_id, publisher_id, direction_id;
+            const author_id = await getAuthorIdByFullName(currentBook["author"]);
+            console.log(author_id);
 
             console.log("edited book saved");
         }
