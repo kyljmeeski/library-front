@@ -1,6 +1,6 @@
 import {createContext, createEffect, createSignal} from "solid-js";
 import {createStore} from "solid-js/store";
-import {fetchBooks, fetchAuthors, fetchPublishers, fetchDirections, createAuthor} from "../hooks/useFetch";
+import {fetchBooks, fetchAuthors, fetchPublishers, fetchDirections, createAuthor, createPublisher} from "../hooks/useFetch";
 
 export const CurrentBookContext = createContext()
 
@@ -123,7 +123,7 @@ export default function CurrentBookProvider(props) {
      * Принимает полное имя автора.
      * Полное имя может состоять из имени и фамилии или из имени, фамилии и отчества (именно в таком порядке).
      * Если в store["authors"] уже есть подходящий автор, возвращает его id.
-     * Если нет, создаем новый, обновляем store["authors"] возвращаем id уже нового автора.
+     * Если нет, создает новый, обновляет store["authors"] и возвращает id уже нового автора.
      */
     const getAuthorIdByFullName = async (fullName) => {
         const parts = fullName.trim().split(" ");
@@ -151,7 +151,31 @@ export default function CurrentBookProvider(props) {
         setStore("authors", (prev) => [...prev, author]);
 
         return await author["id"];
-    }
+    };
+
+    /**
+     * Возвращает id издателя.
+     * Вызывается при сохранении книги в handleSave (в этом же файле).
+     * Принимает название издателя.
+     * Если в store["publishers"] уже есть такой издатели, возвращает его id.
+     * Если нет, создает новый, обновляет store["publishers"] и возвращает id уже нового издателя.
+     */
+    const getPublisherIdByName = async (name) => {
+        const matched = store["publishers"].find((p) =>
+            p["name"] === name
+        );
+
+        if (matched) {
+            // издатель уже есть
+            return matched["id"];
+        }
+
+        // создаем нового издателя
+        const publisher = await createPublisher(name);
+        setStore("publishers", (prev) => [...prev, publisher]);
+
+        return await publisher["id"];
+    };
 
     /**
      * Сохраняет книгу.
@@ -163,7 +187,9 @@ export default function CurrentBookProvider(props) {
             console.log("new book saved");
         } else {                          // редактируем уже существующую книгу
             const author_id = await getAuthorIdByFullName(currentBook["author"]);
-            console.log(author_id);
+            const publisher_id = await getPublisherIdByName(currentBook["publisher"]);
+            console.log("author_id: " + author_id);
+            console.log("publisher_id: " + publisher_id);
 
             console.log("edited book saved");
         }

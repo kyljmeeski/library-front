@@ -112,3 +112,29 @@ export const createAuthor = async (first_name, last_name, middle_name) => {
         return {};
     }
 };
+
+export const createPublisher = async (name) => {
+    try {
+        const response = await fetch(BASE_URL + "api/publishers/", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "is_deleted": false,
+                "name": name
+            })
+        });
+        if (response.ok) {
+            return await response.json();
+        } else {
+            const error = await response.text();
+            console.log("Error while creating publisher: " + error);
+            return {};
+        }
+    } catch (error) {
+        console.log("Error while creating publisher: " + error);
+        return {};
+    }
+};
