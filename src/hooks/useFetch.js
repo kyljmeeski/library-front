@@ -138,3 +138,30 @@ export const createPublisher = async (name) => {
         return {};
     }
 };
+
+export const createDirection = async (name) => {
+    try {
+        const response = await fetch(BASE_URL + "api/directions/", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "is_deleted": false,
+                "name": name
+            })
+        });
+        if (response.ok) {
+            return await response.json();
+        } else {
+            const error = await response.text();
+            console.log("Error while creating direction: " + error);
+            return {};
+        }
+    } catch (error) {
+        console.log("Error while creating direction: " + error);
+        return {};
+    }
+};
+

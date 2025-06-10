@@ -1,6 +1,14 @@
 import {createContext, createEffect, createSignal} from "solid-js";
 import {createStore} from "solid-js/store";
-import {fetchBooks, fetchAuthors, fetchPublishers, fetchDirections, createAuthor, createPublisher} from "../hooks/useFetch";
+import {
+    fetchBooks,
+    fetchAuthors,
+    fetchPublishers,
+    fetchDirections,
+    createAuthor,
+    createPublisher,
+    createDirection
+} from "../hooks/useFetch";
 
 export const CurrentBookContext = createContext()
 
@@ -178,6 +186,30 @@ export default function CurrentBookProvider(props) {
     };
 
     /**
+     * Возвращает id направления.
+     * Вызывается при сохранении книги в handleSave (в этом же файле).
+     * Принимает название издателя.
+     * Если в store["directions"] уже есть такое направление, возвращает его id.
+     * Если нет, создает новый, обновляет store["directions"] и возвращает id уже нового направления.
+     */
+    const getDirectionIdByName = async (name) => {
+        const matched = store["directions"].find((p) =>
+            p["name"] === name
+        );
+
+        if (matched) {
+            // направление уже есть
+            return matched["id"];
+        }
+
+        // создаем новое направление
+        const direction = await createDirection(name);
+        setStore("directions", (prev) => [...prev, direction]);
+
+        return await direction["id"];
+    };
+
+    /**
      * Сохраняет книгу.
      * Срабатывает при нажатии кнопки "Сохранить" в src/features/items/Header.
      * Сохраняет либо отредактированную существующую книгу, либо новую.
@@ -188,8 +220,10 @@ export default function CurrentBookProvider(props) {
         } else {                          // редактируем уже существующую книгу
             const author_id = await getAuthorIdByFullName(currentBook["author"]);
             const publisher_id = await getPublisherIdByName(currentBook["publisher"]);
+            const direction_id = await getDirectionIdByName(currentBook["direction"]);
             console.log("author_id: " + author_id);
             console.log("publisher_id: " + publisher_id);
+            console.log("direction_id: " + direction_id);
 
             console.log("edited book saved");
         }
