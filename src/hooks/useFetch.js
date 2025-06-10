@@ -165,3 +165,26 @@ export const createDirection = async (name) => {
     }
 };
 
+export const updateBook = async (book) => {
+    try {
+        const response = await fetch(BASE_URL + `api/books/${book["id"]}/`, {
+            method: "PUT",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(book)
+        });
+        if (response.ok) {
+            return await response.json();
+        } else {
+            const error = await response.text();
+            console.log("Error while updating book: " + error);
+            return {};
+        }
+    } catch (error) {
+        console.log("Error while updating book: " + error);
+        return {};
+    }
+};
+

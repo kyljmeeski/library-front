@@ -7,7 +7,7 @@ import {
     fetchDirections,
     createAuthor,
     createPublisher,
-    createDirection
+    createDirection, updateBook
 } from "../hooks/useFetch";
 
 export const CurrentBookContext = createContext()
@@ -213,6 +213,7 @@ export default function CurrentBookProvider(props) {
      * Сохраняет книгу.
      * Срабатывает при нажатии кнопки "Сохранить" в src/features/items/Header.
      * Сохраняет либо отредактированную существующую книгу, либо новую.
+     * Обновляет store["books"].
      */
     const handleSave = async () => {
         if (editingStore.isCurrentNew) {  // создаем новую книгу
@@ -221,13 +222,24 @@ export default function CurrentBookProvider(props) {
             const author_id = await getAuthorIdByFullName(currentBook["author"]);
             const publisher_id = await getPublisherIdByName(currentBook["publisher"]);
             const direction_id = await getDirectionIdByName(currentBook["direction"]);
-            console.log("author_id: " + author_id);
-            console.log("publisher_id: " + publisher_id);
-            console.log("direction_id: " + direction_id);
 
-            console.log("edited book saved");
+            const updatedBook = await updateBook({
+                "id": currentBook["id"],
+                "author_ids": [
+                    author_id
+                ],
+                "direction_id": direction_id,
+                "publisher_id": publisher_id,
+                "is_deleted": false,
+                "title": currentBook["title"],
+                "udc": currentBook["udc"],
+                "bbk": currentBook["bbk"],
+                "isbn": currentBook["isbn"],
+                "quantity": currentBook["quantity"]
+            });
+            loadBooks();
         }
-    }
+    };
 
     /**
      * Выбирает книгу из уже существующих.
