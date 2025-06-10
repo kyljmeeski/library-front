@@ -1,21 +1,14 @@
 import {HStack, IconButton, Input, SimpleOption, SimpleSelect, Text, VStack} from "@hope-ui/solid";
 import {AiOutlineSortAscending, AiOutlineSortDescending} from "solid-icons/ai";
-import {For, onMount, Show, useContext} from "solid-js";
+import {For, Show, useContext} from "solid-js";
 import {ItemEditingContext} from "../../providers/ItemEditingProvider";
 import SearchResult from "./SearchResult";
 import {CurrentBookContext} from "../../providers/CurrentBook";
 
 export default function Sidebar() {
 
-    onMount(() => {
-        loadBooks();
-        loadAuthors();
-        loadPublishers();
-        loadDirections();
-    })
-
     const [state, { setASC }] = useContext(ItemEditingContext);
-    const { store, loadBooks, loadAuthors, loadPublishers, loadDirections } = useContext(CurrentBookContext);
+    const { store } = useContext(CurrentBookContext);
 
     return (
         <VStack w="300px" h="$full" gap={"$3"}>

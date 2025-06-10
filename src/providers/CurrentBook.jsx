@@ -1,4 +1,4 @@
-import {createContext, createEffect, createSignal} from "solid-js";
+import {createContext, createEffect, createSignal, onMount} from "solid-js";
 import {createStore} from "solid-js/store";
 import {
     fetchBooks,
@@ -13,9 +13,15 @@ export const CurrentBookContext = createContext()
 
 export default function CurrentBookProvider(props) {
 
+    onMount(() => {
+        loadBooks();
+        loadAuthors();
+        loadPublishers();
+        loadDirections();
+    })
+
     /**
      * Стягивает все книги, сохраняет их в store.
-     * Срабатывает onMount src/features/items/Sidebar.
      */
     const loadBooks = async () => {
         const books = await fetchBooks();
@@ -24,7 +30,6 @@ export default function CurrentBookProvider(props) {
 
     /**
      * Стягивает все издательства, сохраняет их в store.
-     * Срабатывает onMount src/features/items/Sidebar.
      */
     const loadPublishers = async () => {
         const publishers = await fetchPublishers();
@@ -33,7 +38,6 @@ export default function CurrentBookProvider(props) {
 
     /**
      * Стягивает все направления, сохраняет их в store.
-     * Срабатывает onMount src/features/items/Sidebar.
      */
     const loadDirections = async () => {
         const directions = await fetchDirections();
@@ -42,7 +46,6 @@ export default function CurrentBookProvider(props) {
 
     /**
      * Стягивает всех авторов, сохраняет их в store.
-     * Срабатывает onMount src/features/items/Sidebar.
      */
     const loadAuthors = async () => {
         const authors = await fetchAuthors();

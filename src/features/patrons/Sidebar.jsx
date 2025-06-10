@@ -1,21 +1,17 @@
-import { HStack, IconButton, Input, SimpleOption, SimpleSelect, Text, VStack } from "@hope-ui/solid";
-import { AiOutlineSortAscending, AiOutlineSortDescending } from "solid-icons/ai";
+import {HStack, IconButton, Input, SimpleOption, SimpleSelect, Text, VStack} from "@hope-ui/solid";
+import {AiOutlineSortAscending, AiOutlineSortDescending} from "solid-icons/ai";
 import SearchResult from "./SearchResult";
-import {Show, onMount, useContext, For} from "solid-js";
-import { PatronEditingContext } from "../../providers/PatronEditingProvider";
-import { ModalContext } from "../../providers/ModalProvider";
+import {For, Show, useContext} from "solid-js";
+import {PatronEditingContext} from "../../providers/PatronEditingProvider";
+import {ModalContext} from "../../providers/ModalProvider";
 import PatronSearchModal from "./patronSearch/PatronSearchModal";
-import { CurrentPatronContext } from "../../providers/CurrentPatron";
+import {CurrentPatronContext} from "../../providers/CurrentPatron";
 
 export default function Sidebar() {
 
     const [state, { setASC }] = useContext(PatronEditingContext);
-    const [currentPatronState, {store, loadReaders, handle}] = useContext(CurrentPatronContext);
+    const [currentPatronState, {store}] = useContext(CurrentPatronContext);
     const [{ isOpen, onOpen, onClose }] = useContext(ModalContext);
-
-    onMount(() => {
-        loadReaders();
-    })
 
     return (
         <VStack w="300px" h="$full" gap={"$3"}>

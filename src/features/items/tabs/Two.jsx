@@ -1,9 +1,28 @@
 import {
-  VStack, Heading, Text, Box, SimpleGrid, Button,
-  Table, Thead, Tbody, Tr, Th, Td, Input
+  VStack,
+  Heading,
+  Text,
+  Box,
+  SimpleGrid,
+  Button,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Input,
+  Select,
+  SelectTrigger,
+  SelectPlaceholder,
+  SelectValue,
+  SelectIcon,
+  SelectContent, SelectListbox, SelectOption, SelectOptionText
 } from "@hope-ui/solid";
-import { createSignal } from "solid-js";
+import {createSignal, For, useContext} from "solid-js";
 import { HiOutlineBell } from "solid-icons/hi";
+import {CurrentBookContext} from "../../../providers/CurrentBook";
+import {CurrentPatronContext} from "../../../providers/CurrentPatron";
 
 const initialData = [
   
@@ -20,6 +39,10 @@ const usersList = [
 ];
 
 export default function two() {
+
+  const { store: bookStore } = useContext(CurrentBookContext);
+  const [currentPatronState, {store: readerStore}] = useContext(CurrentPatronContext);
+
   const [entries, setEntries] = createSignal(
     initialData.map((entry, i) => ({
       ...entry,
@@ -30,8 +53,6 @@ export default function two() {
   const [book, setBook] = createSignal("");
   const [user, setUser] = createSignal("");
   const [wasSubmitted, setWasSubmitted] = createSignal(false);
-  const [searchBook, setSearchBook] = createSignal("");
-  const [searchUser, setSearchUser] = createSignal("");
 
   const formatDate = (val) => {
     const date = new Date(val);
@@ -70,6 +91,9 @@ export default function two() {
     setWasSubmitted(false);
   };
 
+  const [bookId, setBookId] = createSignal(0);
+  const [readerId, setReaderId] = createSignal(0);
+
   return (
     <VStack w="$full" px="$7" py="$5" gap="$6" alignItems="start">
       <Box w="$full" p="$5" bg="white" borderRadius="$md" boxShadow="$sm">
@@ -77,36 +101,65 @@ export default function two() {
         <SimpleGrid columns={{ "@initial": 1, "@md": 2 }} gap="$4">
           <Box>
             <Text mb="$2" fontSize="sm">Книга</Text>
-            <Input
-              placeholder="Книга"
-              value={searchBook()}
-              onInput={(e) => setSearchBook(e.target.value)}
-              list="books-list"
-              onChange={(e) => setBook(e.target.value)}
-              style={{ border: getInputBorder(book()) }}
-            />
-            <datalist id="books-list">
-              {bookTitles.filter(title => title.toLowerCase().includes(searchBook().toLowerCase()))
-                .map((title) => (
-                  <option value={title} key={title} />
-                ))}
-            </datalist>
+
+            <Select>
+              <SelectTrigger>
+                <SelectPlaceholder>Выберите книгу</SelectPlaceholder>
+                <SelectValue />
+                <SelectIcon />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectListbox>
+                  <For each={
+                    // sort by book["id"]
+                    [...bookStore["books"]].sort((a, b) => {
+                      return a["id"] - b["id"];
+                    })
+                  }>
+                    {(book) => (
+                        <SelectOption>
+                          <SelectOptionText value={book["id"]}>
+                            {book["id"]}. {book["title"]}, {book["authors"]?.[0]?.["last_name"]} {book["authors"]?.[0]?.["first_name"]?.[0]}.
+                          </SelectOptionText>
+                        </SelectOption>
+                    )}
+                  </For>
+                </SelectListbox>
+              </SelectContent>
+            </Select>
+
+            <Select
+                onChange={(e) => setBookId(e.currentTarget.value)}
+            >
+              <For each={
+                // sort by book["id"]
+                [...bookStore["books"]].sort((a, b) => {
+                  return a["id"] - b["id"];
+                })
+              }>
+                {(book) => (
+                    <option value={book["id"]}>
+                      {book["id"]}. {book["title"]}, {book["authors"]?.[0]?.["last_name"]} {book["authors"]?.[0]?.["first_name"]?.[0]}.
+                    </option>
+                )}
+              </For>
+            </Select>
           </Box>
           <Box>
             <Text mb="$2" fontSize="sm">Читатель</Text>
             <Input
               placeholder="Читатель"
-              value={searchUser()}
-              onInput={(e) => setSearchUser(e.target.value)}
-              list="users-list"
-              onChange={(e) => setUser(e.target.value)}
+              list="reader-list"
               style={{ border: getInputBorder(user()) }}
             />
-            <datalist id="users-list">
-              {usersList.filter(user => user.toLowerCase().includes(searchUser().toLowerCase()))
-                .map((userName) => (
-                  <option value={userName} key={userName} />
-                ))}
+            <datalist id="reader-list">
+              <For each={readerStore["readers"]}>
+                {(reader) => {
+                  return <option>
+                    {reader["last_name"]} {reader["first_name"]} [{reader["username"]}]
+                  </option>
+                }}
+              </For>
             </datalist>
           </Box>
         </SimpleGrid>

@@ -1,4 +1,4 @@
-import { createContext, createEffect, createSignal, useContext } from "solid-js";
+import {createContext, createEffect, createSignal, onMount, useContext} from "solid-js";
 import { createStore } from "solid-js/store";
 import { InputValidationContext } from "./InputValidationProvider";
 import { PatronEditingContext } from "./PatronEditingProvider";
@@ -9,6 +9,10 @@ import {createReader, fetchReaders, updateReader} from "../hooks/useFetch";
 export const CurrentPatronContext = createContext();
 
 export default function CurrentPatronProvider(props) {
+
+    onMount(() => {
+        loadReaders();
+    })
 
     const [inputValidationState, { isInputValid, validateInput }] = useContext(InputValidationContext);
     const [patronEditingState, { setEditing, setReadyToSave, setPatronSelected }] = useContext(PatronEditingContext);
