@@ -11,7 +11,7 @@ export default function Header() {
 
     const { open, openPatronTab } = useOpen();
 
-    const [ currentPatronState, { handleSave, areFieldsValid, createNewPatron }] = useContext(CurrentPatronContext);
+    const [ currentPatronState, { handleSave, areFieldsValid, handleNewBookSelect }] = useContext(CurrentPatronContext);
 
     return (
         <HStack justifyContent={"space-between"} w={"$full"}>
@@ -31,7 +31,7 @@ export default function Header() {
                 <IconButton 
                     backgroundColor={"$accent11"} 
                     icon={<FaSolidPlus />} 
-                    onClick={() => {open("/patrons"); openPatronTab("personal"); createNewPatron();}}
+                    onClick={handleNewBookSelect}
                 />
             </HStack>
         </HStack>

@@ -251,3 +251,19 @@ export const createReader = async (reader) => {
     }
 };
 
+export const updateReader = async (id, reader) => {
+    try {
+        return await fetch(BASE_URL + `api/users/${id}/`, {
+            method: "PUT",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(reader)
+        });
+    } catch (error) {
+        console.log("Error while updating reader: " + error);
+        return {};
+    }
+};
+

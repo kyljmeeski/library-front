@@ -4,7 +4,7 @@ import { InputValidationContext } from "./InputValidationProvider";
 import { PatronEditingContext } from "./PatronEditingProvider";
 import axios from "axios";
 import { notificationService } from "@hope-ui/solid";
-import {createReader, fetchReaders} from "../hooks/useFetch";
+import {createReader, fetchReaders, updateReader} from "../hooks/useFetch";
 
 export const CurrentPatronContext = createContext();
 
@@ -12,18 +12,6 @@ export default function CurrentPatronProvider(props) {
 
     const [inputValidationState, { isInputValid, validateInput }] = useContext(InputValidationContext);
     const [patronEditingState, { setEditing, setReadyToSave, setPatronSelected }] = useContext(PatronEditingContext);
-
-    createEffect(() => {
-        validateInput("firstName", state.newPatron.firstName);
-        validateInput("lastName", state.newPatron.lastName);
-        validateInput("studentNumber", state.newPatron.studentNumber);
-        setReadyToSave(
-            isInputValid("firstName") && 
-            isInputValid("lastName") && 
-            isInputValid("studentNumber") &&
-            checkIfReadyToSave()
-        );
-    });
 
     const checkIfReadyToSave = () => {
         for (let prop in state.currentPatron) {
@@ -191,6 +179,7 @@ export default function CurrentPatronProvider(props) {
     });
 
     const [currentReader, setCurrentReader] = createStore({
+        "id": 0,
         "first_name": "",
         "middle_name": "",
         "last_name": "",
@@ -223,6 +212,8 @@ export default function CurrentPatronProvider(props) {
     };
 
     createEffect(() => {
+        const isFirstNameValid = currentReader["first_name"].trim() !== "";
+        const isLastNameValid = currentReader["last_name"].trim() !== "";
         const isUsernameValid =
             currentReader["username"] !== null &&
             currentReader["username"] !== undefined &&
@@ -233,9 +224,12 @@ export default function CurrentPatronProvider(props) {
             : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentReader["email"].trim())
         ;
         const isPassportValid = /^[A-Za-z]{2}\d{6}$/.test(currentReader["passport"].trim());
-        const isPhoneValid = /^\d{9}$/.test(currentReader["phone"].trim());
+        const isPhoneValid = /^\+996\d{9}$/.test(currentReader["phone"].trim());
 
-        setAreFieldsValid(isUsernameValid && isEmailValid && isPassportValid && isPhoneValid);
+        setAreFieldsValid(
+            isFirstNameValid && isLastNameValid && isUsernameValid &&
+            isEmailValid && isPassportValid && isPhoneValid
+        );
     });
 
     const handleInput = (event) => {
@@ -244,7 +238,7 @@ export default function CurrentPatronProvider(props) {
     };
 
     const nonEmpty = (obj) => {
-        const filteredObj = Object.fromEntries(
+        return Object.fromEntries(
             Object.entries(obj).filter(([_, value]) =>
                 value !== undefined &&
                 value !== null &&
@@ -253,29 +247,66 @@ export default function CurrentPatronProvider(props) {
                 !(typeof value === "object" && value !== null && Object.keys(value).length === 0)
             )
         );
-        return filteredObj;
     }
 
     const handleSave = async () => {
-        setCurrentReader("phone", (prev) => `+996${prev}`);
-        const response = await createReader(nonEmpty(currentReader));
+        // TODO: найти способ получше, поля могут меняться
+        setErrors("last_name", "");
+        setErrors("first_name", "");
+        setErrors("middle_name", "");
+        setErrors("username", "");
+        setErrors("birth_date", "");
+        setErrors("passport", "");
+        setErrors("email", "");
+        setErrors("phone", "");
+        setErrors("address", "");
+
+        let response;
+        if (editingStore["isCurrentReaderNew"]) {
+            response = await createReader(nonEmpty(currentReader));
+        } else {
+            response = await updateReader(currentReader["id"], nonEmpty(currentReader));
+        }
+
         if (response.status === 400) {
-            // TODO: найти способ получше, поля могут меняться
-            setErrors("last_name", "");
-            setErrors("first_name", "");
-            setErrors("middle_name", "");
-            setErrors("username", "");
-            setErrors("birth_date", "");
-            setErrors("passport", "");
-            setErrors("email", "");
-            setErrors("phone", "");
-            setErrors("address", "");
             const body = await response.json();
             for (let key in body) {
                 setErrors(key, body[key]?.[0]);
             }
         }
-        console.log(errors);
+
+        loadReaders();
+    }
+
+    const handleSelectReader = (reader) => {
+        setEditingStore("isCurrentReaderNew", false);
+        setCurrentReader("id", reader["id"]);
+        setCurrentReader("first_name", reader["first_name"]);
+        setCurrentReader("middle_name", reader["middle_name"]);
+        setCurrentReader("last_name", reader["last_name"]);
+        setCurrentReader("username", reader["username"]);
+        setCurrentReader("birth_date", reader["birth_date"]);
+        setCurrentReader("passport", reader["passport"]);
+        setCurrentReader("email", reader["email"]);
+        setCurrentReader("phone", reader["phone"]);
+        setCurrentReader("address", reader["address"]);
+        setCurrentReader("role", reader["role"]);
+    }
+
+    const handleNewBookSelect = () => {
+        setCurrentReader("id", 0);
+        setCurrentReader("first_name", "");
+        setCurrentReader("middle_name", "");
+        setCurrentReader("last_name", "");
+        setCurrentReader("username", "");
+        setCurrentReader("birth_date", null);
+        setCurrentReader("passport", "");
+        setCurrentReader("email", "");
+        setCurrentReader("phone", "");
+        setCurrentReader("address", "");
+        setCurrentReader("role", "reader");
+
+        setEditingStore("isCurrentReaderNew", true);
     }
 
 
@@ -290,7 +321,7 @@ export default function CurrentPatronProvider(props) {
             currentReader,
             areFieldsValid,
             errors,
-            handleInput,
+            handleInput, handleSelectReader, handleNewBookSelect,
 
             handleSave, 
             handleSelect, 

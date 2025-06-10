@@ -1,7 +1,7 @@
 import { HStack, IconButton, Input, SimpleOption, SimpleSelect, Text, VStack } from "@hope-ui/solid";
 import { AiOutlineSortAscending, AiOutlineSortDescending } from "solid-icons/ai";
 import SearchResult from "./SearchResult";
-import { Show, onMount, useContext } from "solid-js";
+import {Show, onMount, useContext, For} from "solid-js";
 import { PatronEditingContext } from "../../providers/PatronEditingProvider";
 import { ModalContext } from "../../providers/ModalProvider";
 import PatronSearchModal from "./patronSearch/PatronSearchModal";
@@ -10,12 +10,11 @@ import { CurrentPatronContext } from "../../providers/CurrentPatron";
 export default function Sidebar() {
 
     const [state, { setASC }] = useContext(PatronEditingContext);
-    const [currentPatronState, {store, loadReaders}] = useContext(CurrentPatronContext);
+    const [currentPatronState, {store, loadReaders, handle}] = useContext(CurrentPatronContext);
     const [{ isOpen, onOpen, onClose }] = useContext(ModalContext);
 
     onMount(() => {
         loadReaders();
-        console.log(store["readers"]);
     })
 
     return (
@@ -53,13 +52,13 @@ export default function Sidebar() {
                     overflow={"auto"} 
                     h="calc(100vh - 32px - 40px - 40px - 21px - 40px - 0.75rem * 8)"
                 >
-                <Show when={currentPatronState.patrons.length == 0}>
+                <Show when={store["readers"]?.length === 0}>
                     <Text w={"$full"} p={"$3"} color={"$blackAlpha10"}>
                         Нет результатов.
                     </Text>
                 </Show>
-                <For each={currentPatronState.patrons}>{(patron) =>
-                    <SearchResult patron={patron} />
+                <For each={store["readers"]}>{(reader) =>
+                    <SearchResult reader={reader} />
                 }</For>
                 </VStack>
             </VStack>

@@ -29,7 +29,7 @@ export default function Personal() {
                 <Heading color={"$accent11"}>Общая информация</Heading>
                 <HStack w={"$full"} justifyContent={"start"} gap={"$3"}>
                     <VStack alignItems={"start"} flexBasis={"calc(100%/3)"}>
-                        <label for="last_name">Фамилия</label>
+                        <label for="last_name">Фамилия*</label>
                         <Input
                             onClick={() => setEditing(true)}
                             disabled={patronEditingState.isLocked}
@@ -40,7 +40,7 @@ export default function Personal() {
                         />
                     </VStack>
                     <VStack alignItems={"start"} flexBasis={"calc(100%/3)"}>
-                        <label for="first_name">Имя</label>
+                        <label for="first_name">Имя*</label>
                         <Input
                             onClick={() => setEditing(true)}
                             disabled={patronEditingState.isLocked}
@@ -63,7 +63,7 @@ export default function Personal() {
                     </VStack>
                 </HStack>
                 <VStack alignItems={"start"} w={"calc(100%/3)"}>
-                    <label for="username">ID читателя</label>
+                    <label for="username">ID читателя*</label>
                     <Input
                         onClick={() => setEditing(true)}
                         disabled={patronEditingState.isLocked}
@@ -99,8 +99,9 @@ export default function Personal() {
                         />
                     </VStack>
                     <VStack alignItems={"start"} w={"calc(100%/3)"}>
-                        <label for="passport">Серия и номер паспорта</label>
+                        <label for="passport">Серия и номер паспорта*</label>
                         <Input
+                            maxLength="8"
                             onClick={() => setEditing(true)}
                             disabled={patronEditingState.isLocked}
                             name="passport"
@@ -123,7 +124,7 @@ export default function Personal() {
             {/* Контактные данные: Email и Телефон в одной строке */}
             <VStack w={"$full"} alignItems={"start"} gap={"$3"}>
                 <Heading color={"$accent11"}>Контактные данные</Heading>
-                <HStack w={"$full"} justifyContent={"start"} gap={"$3"}>
+                <HStack w={"$full"} justifyContent={"start"} alignItems={"start"} gap={"$3"}>
                     {/* Email */}
                     <VStack alignItems={"start"} flexBasis={"calc(100%/3)"}>
                         <label for="email">Основной Email</label>
@@ -135,16 +136,23 @@ export default function Personal() {
                             id="email"
                             placeholder="email@example.com"
                             value={currentReader["email"]}
+                            invalid={errors["email"].trim() !== ""}
                         />
+                        <Text
+                            when={errors["email"].trim() !== ""}
+                            color="red"
+                        >
+                            {errors["email"]}
+                        </Text>
                     </VStack>
 
                     {/* Телефон */}
                     <VStack alignItems={"start"} flexBasis={"calc(100%/3)"}>
-                        <label for="phone">Основной телефон</label>
+                        <label for="phone">Основной телефон*</label>
                         <InputGroup>
-                            <InputLeftAddon>+996</InputLeftAddon>
                             <Input
-                                maxLength="9"
+                                placeholder="+996XXXXXXXXX"
+                                maxLength="13"
                                 onClick={() => setEditing(true)}
                                 disabled={patronEditingState.isLocked}
                                 name="phone"
@@ -153,8 +161,15 @@ export default function Personal() {
                                 type="tel"
                                 class="patron-phone"
                                 value={currentReader["phone"]}
+                                invalid={errors["phone"].trim() !== ""}
                             />
                         </InputGroup>
+                        <Text
+                            when={errors["phone"].trim() !== ""}
+                            color="red"
+                        >
+                            {errors["phone"]}
+                        </Text>
                     </VStack>
 
                     {/* Пустой блок для выравнивания */}

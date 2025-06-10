@@ -4,16 +4,21 @@ import { CurrentPatronContext } from "../../providers/CurrentPatron";
 
 export default function SearchResult(props) {
 
-    const [state, { selectPatron }] = useContext(CurrentPatronContext);
+    const [state, { currentReader, handleSelectReader }] = useContext(CurrentPatronContext);
 
     return (
-        <VStack backgroundColor={state.currentPatron.studentNumber == props.patron.studentNumber ? "$blackAlpha5" : "transparent"} w="$full" alignItems={"start"} p="$3" _hover={{backgroundColor: "$blackAlpha5"}} onClick={() => selectPatron(props.patron)}>
-            <Text fontSize={"12px"}>
-                {props.patron.firstName}
+        <VStack
+            backgroundColor={props["reader"]["id"] === currentReader["id"] ? "$blackAlpha5" : "transparent"}
+            w="$full" alignItems={"start"} p="$3"
+            _hover={{backgroundColor: "$blackAlpha5"}}
+            onClick={() => handleSelectReader(props["reader"])}
+        >
+            <Text fontSize="12px">
+                {props["reader"]["last_name"] + " " + props["reader"]["first_name"]}
             </Text>
             <Text>
-                {props.patron.lastName}
+                {}
             </Text>
         </VStack>
-    )
+    );
 }
