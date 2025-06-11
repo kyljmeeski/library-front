@@ -66,7 +66,7 @@ export default function LoginPage({ onLoginSuccess }) {
 
           // Переход на нужную страницу в зависимости от роли
           if (role === 'librarian') {
-            navigate('/'); // Страница для библиотекаря
+            navigate('/items/1'); // Страница для библиотекаря
           } else if (role === 'reader') {
             navigate('/pages/UserDashboard'); // Страница для пользователя
           } else {
