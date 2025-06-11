@@ -307,3 +307,52 @@ export const fetchIssues = async () => {
     }
 };
 
+export const fetchReturns = async () => {
+    try {
+        const response = await fetch(BASE_URL + "api/returns/", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`,
+            }
+        });
+        if (response.ok) {
+            return await response.json();
+        } else {
+            console.log("Error while fetching issues: " + await response.json());
+            return [];
+        }
+    } catch (error) {
+        console.log("Error while fetching issues: " + error);
+        return [];
+    }
+};
+
+export const fetchIssuesToBorrow = async () => {
+    try {
+        const issues = await fetchIssues();
+        const returns = await fetchReturns();
+        return issues.filter(issue => !returns.some(aReturn => aReturn["issue"]["id"] === issue["id"]));
+    } catch (error) {
+        console.log("Error while fetching issues: " + error);
+        return [];
+    }
+};
+
+export const createReturn = async (issueId) => {
+    try {
+        return await fetch(BASE_URL + "api/returns/", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "issue_id": issueId
+            })
+        });
+    } catch (error) {
+        console.log("Error while creating return: " + error);
+        return {};
+    }
+};
+

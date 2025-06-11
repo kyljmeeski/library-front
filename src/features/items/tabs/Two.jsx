@@ -27,12 +27,12 @@ import {SearchableSelect} from "../../SearchableSelect";
 import {createIssue} from "../../../hooks/useFetch";
 
 const initialData = [
-  
+
 ];
 
 export default function two() {
 
-  const { store: bookStore, loadIssues } = useContext(CurrentBookContext);
+  const { store: bookStore, loadIssuesToBorrow } = useContext(CurrentBookContext);
   const [currentPatronState, {store: readerStore}] = useContext(CurrentPatronContext);
 
   const [errorMessage, setErrorMessage] = createSignal("");
@@ -54,7 +54,7 @@ export default function two() {
     const response = await createIssue(selectedBook()["value"], selectedReader()["value"]);
     const responseBody = await response.json();
     if (response.ok) {
-      loadIssues();
+      loadIssuesToBorrow();
     } else if (response.status === 400) {
       console.log(responseBody)
       setErrorMessage(responseBody["non_field_errors"][0]);
@@ -146,20 +146,16 @@ export default function two() {
               <Th>Читатель</Th>
               <Th>Дата выдачи</Th>
               <Th>Срок возврата</Th>
-              <Th>Статус</Th>
               <Th></Th>
             </Tr>
           </Thead>
           <Tbody>
-            {bookStore["issues"]?.map((issue) => (
+            {bookStore["issuesToBorrow"]?.filter(issue => issue["inventory"]["status"] === "borrowed")?.map((issue) => (
               <Tr key={issue["id"]}>
                 <Td>{issue["inventory"]["book"]["title"]}</Td>
                 <Td>{issue["reader"]["last_name"] + " " + issue["reader"]["first_name"]}</Td>
                 <Td>{issue["issue_date"]}</Td>
                 <Td>{issue["due_date"]}</Td>
-                <Td>
-                  <StatusTag dueDate={issue["due_date"]}/>
-                </Td>
                 <Td>
 
                 </Td>
@@ -171,16 +167,4 @@ export default function two() {
     </VStack>
   );
 }
-
-function StatusTag({ dueDate }) {
-  const now = new Date();
-  const due = new Date(dueDate);
-
-  if (now > due) {
-    return <Text color="$red10" fontWeight="$medium">Просрочено</Text>;
-  }
-
-  return <Text color="$orange10" fontWeight="$medium">Выдано</Text>;
-}
-
 
