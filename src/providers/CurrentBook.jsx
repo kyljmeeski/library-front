@@ -7,7 +7,7 @@ import {
     fetchDirections,
     createAuthor,
     createPublisher,
-    createDirection, updateBook, createBook, fetchIssues, fetchIssuesToBorrow
+    createDirection, updateBook, createBook, fetchIssues, fetchBorrowedIssues, fetchReturns
 } from "../hooks/useFetch";
 export const CurrentBookContext = createContext()
 
@@ -18,12 +18,18 @@ export default function CurrentBookProvider(props) {
         loadAuthors();
         loadPublishers();
         loadDirections();
-        loadIssuesToBorrow()
+        loadBorrowedIssues();
+        loadReturns();
     });
 
-    const loadIssuesToBorrow = async () => {
-        const issuesToBorrow = await fetchIssuesToBorrow();
-        setStore("issuesToBorrow", issuesToBorrow);
+    const loadBorrowedIssues = async () => {
+        const borrowedIssues = await fetchBorrowedIssues();
+        setStore("borrowedIssues", borrowedIssues);
+    }
+
+    const loadReturns = async () => {
+        const returns = await fetchReturns();
+        setStore("returns", returns);
     }
 
     /**
@@ -64,7 +70,8 @@ export default function CurrentBookProvider(props) {
         publishers: [],
         directions: [],
         books: [],
-        issuesToBorrow: []
+        borrowedIssues: [],
+        returns: []
     });
 
     const [editingStore, setEditingStore] = createStore({
@@ -315,7 +322,7 @@ export default function CurrentBookProvider(props) {
     }
 
     const currentBookState = {
-        loadAuthors, loadPublishers, loadDirections, loadBooks, loadIssuesToBorrow,
+        loadAuthors, loadPublishers, loadDirections, loadBooks, loadBorrowedIssues, loadReturns,
         handleInput,
         handleSave, handleNewBookSelect,
         fieldsValidation,

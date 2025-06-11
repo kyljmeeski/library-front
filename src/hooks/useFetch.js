@@ -327,7 +327,7 @@ export const fetchReturns = async () => {
     }
 };
 
-export const fetchIssuesToBorrow = async () => {
+export const fetchBorrowedIssues = async () => {
     try {
         const issues = await fetchIssues();
         const returns = await fetchReturns();

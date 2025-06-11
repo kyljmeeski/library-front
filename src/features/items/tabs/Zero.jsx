@@ -1,5 +1,6 @@
 import { VStack, Heading, SimpleGrid, Box, Text } from "@hope-ui/solid";
-import { createSignal, createMemo } from "solid-js";
+import {createSignal, createMemo, useContext} from "solid-js";
+import {CurrentBookContext} from "../../../providers/CurrentBook";
 
 // Подключение к API для получения данных
 const fetchData = async () => {
@@ -9,6 +10,9 @@ const fetchData = async () => {
 };
 
 export default function Zero() {
+
+  const { store } = useContext(CurrentBookContext);
+
   const [entries, setEntries] = createSignal([]);
 
   // Загрузка данных при монтировании компонента
@@ -39,13 +43,13 @@ export default function Zero() {
       <Heading size="lg" color="$accent11">Статистика библиотекаря</Heading>
 
       <SimpleGrid columns={{ "@initial": 1, "@md": 2 }} gap="$4" w="$md">
-        <StatCard label="Всего книг" value={stats().total} color="gray" icon="📚" />
-        <StatCard label="Выдано" value={stats().onHands} color="orange" icon="📖" />
+        <StatCard label="Всего книг" value={store["books"]?.length} color="gray" icon="📚" />
+        <StatCard label="Выдано" value={store["borrowedIssues"]?.length} color="orange" icon="📖" />
       </SimpleGrid>
 
       <SimpleGrid columns={1} gap="$4" w="$md">
         <StatCard label="Просрочено" value={stats().overdue} color="red" icon="⏳" />
-        <StatCard label="Возвращено" value={stats().returned} color="green" icon="✔️" />
+        <StatCard label="Возвращено" value={store["returns"]?.length} color="green" icon="✔️" />
       </SimpleGrid>
     </VStack>
   );

@@ -7,7 +7,7 @@ import {createReturn} from "../../../hooks/useFetch";
 
   export default function Three() {
 
-    const { store: bookStore, loadIssuesToBorrow } = useContext(CurrentBookContext);
+    const { store: bookStore, loadBorrowedIssues, loadReturns } = useContext(CurrentBookContext);
 
     const [successMessage, setSuccessMessage] = createSignal("");
     const [errorMessage, setErrorMessage] = createSignal("");
@@ -21,7 +21,8 @@ import {createReturn} from "../../../hooks/useFetch";
       } else {
         setErrorMessage(await response.json());
       }
-      loadIssuesToBorrow();
+      loadBorrowedIssues();
+      loadReturns();
     };
   
     return (
@@ -55,14 +56,14 @@ import {createReturn} from "../../../hooks/useFetch";
                 </Tr>
               </Thead>
               <Tbody>
-                {bookStore["issuesToBorrow"]?.length === 0 ? (
+                {bookStore["borrowedIssues"]?.length === 0 ? (
                   <Tr>
                     <Td colSpan={8}>
                       <Text textAlign="center" py="$6" fontSize="xs">Нет книг на возврат</Text>
                     </Td>
                   </Tr>
                 ) : (
-                  bookStore["issuesToBorrow"]
+                  bookStore["borrowedIssues"]
                     ?.filter(issue => issue["inventory"]["status"] === "borrowed")
                     .map((issue) => (
                       <Tr key={issue["id"]}>

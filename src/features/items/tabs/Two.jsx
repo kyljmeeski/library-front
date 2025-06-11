@@ -32,7 +32,7 @@ const initialData = [
 
 export default function two() {
 
-  const { store: bookStore, loadIssuesToBorrow } = useContext(CurrentBookContext);
+  const { store: bookStore, loadBorrowedIssues } = useContext(CurrentBookContext);
   const [currentPatronState, {store: readerStore}] = useContext(CurrentPatronContext);
 
   const [errorMessage, setErrorMessage] = createSignal("");
@@ -54,7 +54,7 @@ export default function two() {
     const response = await createIssue(selectedBook()["value"], selectedReader()["value"]);
     const responseBody = await response.json();
     if (response.ok) {
-      loadIssuesToBorrow();
+      loadBorrowedIssues();
     } else if (response.status === 400) {
       console.log(responseBody)
       setErrorMessage(responseBody["non_field_errors"][0]);
@@ -150,7 +150,7 @@ export default function two() {
             </Tr>
           </Thead>
           <Tbody>
-            {bookStore["issuesToBorrow"]?.filter(issue => issue["inventory"]["status"] === "borrowed")?.map((issue) => (
+            {bookStore["borrowedIssues"]?.filter(issue => issue["inventory"]["status"] === "borrowed")?.map((issue) => (
               <Tr key={issue["id"]}>
                 <Td>{issue["inventory"]["book"]["title"]}</Td>
                 <Td>{issue["reader"]["last_name"] + " " + issue["reader"]["first_name"]}</Td>
