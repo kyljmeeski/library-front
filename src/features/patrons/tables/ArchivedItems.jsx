@@ -1,13 +1,10 @@
-import { Table, Tbody, Td, Th, Thead, Tr } from "@hope-ui/solid"
-import { For, createEffect, createSignal, useContext } from "solid-js"
-import { CurrentPatronContext } from "../../../providers/CurrentPatron";
+import {Table, Tbody, Td, Th, Thead, Tr} from "@hope-ui/solid"
+import {For, useContext} from "solid-js"
+import {CurrentPatronContext} from "../../../providers/CurrentPatron";
 
 export default function ArchivedItems() {
 
     const [state, { archivedItems, fetchItems, fetchArchivedItems }] = useContext(CurrentPatronContext);
-    const [queryPath, setQueryPath] = createSignal(window.HOST_ADDRESS + "/patrons/" + state.currentPatron.studentNumber + "/items");
-    createEffect(() => setQueryPath(window.HOST_ADDRESS + "/patrons/" + state.currentPatron.studentNumber + "/archive"));
-    createEffect(() => fetchArchivedItems(queryPath()));
 
     return (
         <Table dense highlightOnHover>

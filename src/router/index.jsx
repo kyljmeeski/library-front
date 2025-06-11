@@ -32,8 +32,6 @@ return (
         <Route path="/patrons" element={<Patrons />}>
             <Route path="" element={<Personal />} />
             <Route path="personal" element={<Personal />} />
-            <Route path="access" element={<Access />} />
-            <Route path="notes" element={<Notes />} />
             <Route path="statistics" element={<Statistics />} />
         </Route>
     </Routes>

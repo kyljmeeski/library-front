@@ -272,6 +272,9 @@ export default function CurrentPatronProvider(props) {
             response = await updateReader(currentReader["id"], nonEmpty(currentReader));
         }
 
+        if (response.ok) {
+            setEditingStore("isCurrentReaderNew", false);
+        }
         if (response.status === 400) {
             const body = await response.json();
             for (let key in body) {

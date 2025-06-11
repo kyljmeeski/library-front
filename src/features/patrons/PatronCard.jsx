@@ -5,31 +5,41 @@ import useOpen from "../../hooks/useOpen";
 import {CurrentPageContext} from "../../providers/CurrentPageProvider";
 
 export default function PatronCard() {
-    const [state] = useContext(CurrentPageContext);
+    const [state, {setCurrentPatronTab}] = useContext(CurrentPageContext);
     const { openPatronTab } = useOpen();
 
     const buttonStyles = {
-        px: "$8", py: "$2", borderRadius: "xl", _hover: { backgroundColor: "$accent11", color: "white" }, _active: { backgroundColor: "$accent11", color: "white" }
+        px: "$8", py: "$2", borderRadius: "0", _hover: { backgroundColor: "$accent11", color: "white" }, _active: { backgroundColor: "$accent11", color: "white" }
     };
 
     return (
         <VStack w={"$full"} h={"calc(100vh - 32px - 40px - 0.75rem * 5)"} gap={"$3"}>
-            <VStack w={"$full"} backgroundColor={"white"} flexGrow={"1"} h={"calc(100vh - 32px - 40px * 3 - 224px - 0.75rem * 3)"} overflowY={"auto"}>
+            <VStack w={"$full"} backgroundColor={"white"}>
                 <HStack justifyContent={"start"} w={"$full"}>
-                    {["personal", "access", "notes", "statistics"].map(tab => (
+                    {["personal", "statistics"].map(tab => (
                         <Button
                             tabIndex={"-1"}
-                            onClick={() => openPatronTab(tab)}
+                            onClick={() => {
+                                openPatronTab(tab);
+                                setCurrentPatronTab(tab);
+                            }}
                             color={state.currentPatronTab === tab ? "white" : "$blackAlpha11"}
                             backgroundColor={state.currentPatronTab === tab ? "$accent11" : "transparent"}
                             {...buttonStyles}
                         >
                             {tab === "personal" ? "Личные данные" :
-                             tab === "access" ? "Доступ" :
-                             tab === "notes" ? "Заметки" : "Статистика"}
+                                tab === "access" ? "Доступ" :
+                                    tab === "notes" ? "Заметки" : "Статистика"}
                         </Button>
                     ))}
                 </HStack>
+            </VStack>
+            <VStack
+                w={"$full"}
+                backgroundColor={"white"}
+                overflow={"auto"}
+                h={"calc(100vh - 32px - 40px * 2 - 0.75rem * 6)"}
+            >
                 <Outlet />
             </VStack>
         </VStack>

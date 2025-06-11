@@ -1,15 +1,12 @@
-import { Button, Table, Tbody, Td, Th, Thead, Tr, notificationService } from "@hope-ui/solid";
+import {Button, notificationService, Table, Tbody, Td, Th, Thead, Tr} from "@hope-ui/solid";
 import axios from "axios";
-import { For, createEffect, createSignal, useContext } from "solid-js";
-import { CurrentPatronContext } from "../../../providers/CurrentPatron";
+import {For, useContext} from "solid-js";
+import {CurrentPatronContext} from "../../../providers/CurrentPatron";
 import useOpen from "../../../hooks/useOpen";
 
 export default function CheckedOutItems() {
 
     const [state, { items, setItems, fetchItems, fetchArchivedItems, setArchiveItems }] = useContext(CurrentPatronContext);
-    const [queryPath, setQueryPath] = createSignal(window.HOST_ADDRESS + "/patrons/" + state.currentPatron.studentNumber + "/items");
-    createEffect(() => setQueryPath(window.HOST_ADDRESS + "/patrons/" + state.currentPatron.studentNumber + "/items"));
-    createEffect(() => {fetchItems(queryPath());});
 
     const { open, openPatronTab } = useOpen();
 
