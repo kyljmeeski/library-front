@@ -17,31 +17,25 @@ import {
   SelectPlaceholder,
   SelectValue,
   SelectIcon,
-  SelectContent, SelectListbox, SelectOption, SelectOptionText
+  SelectContent, SelectListbox, SelectOption, SelectOptionText, SelectLabel, Alert, AlertIcon
 } from "@hope-ui/solid";
-import {createSignal, For, useContext} from "solid-js";
+import {createEffect, createSignal, For, useContext} from "solid-js";
 import { HiOutlineBell } from "solid-icons/hi";
 import {CurrentBookContext} from "../../../providers/CurrentBook";
 import {CurrentPatronContext} from "../../../providers/CurrentPatron";
+import {SearchableSelect} from "../../SearchableSelect";
+import {createIssue} from "../../../hooks/useFetch";
 
 const initialData = [
   
 ];
 
-const bookTitles = [
-  "Война и мир", "1984", "Мастер и Маргарита", "Преступление и наказание",
-  "Убить пересмешника", "Гордость и предубеждение", "На маяк", "451 градус по Фаренгейту"
-];
-
-const usersList = [
-  "Иван Иванов", "Анна Петрова", "Дмитрий Смирнов", "Ольга Сидорова",
-  "Алексей Васильев", "Мария Кузнецова", "Елена Соколова", "Петр Чернов"
-];
-
 export default function two() {
 
-  const { store: bookStore } = useContext(CurrentBookContext);
+  const { store: bookStore, loadIssues } = useContext(CurrentBookContext);
   const [currentPatronState, {store: readerStore}] = useContext(CurrentPatronContext);
+
+  const [errorMessage, setErrorMessage] = createSignal("");
 
   const [entries, setEntries] = createSignal(
     initialData.map((entry, i) => ({
@@ -50,49 +44,52 @@ export default function two() {
     }))
   );
 
-  const [book, setBook] = createSignal("");
-  const [user, setUser] = createSignal("");
-  const [wasSubmitted, setWasSubmitted] = createSignal(false);
-
   const formatDate = (val) => {
     const date = new Date(val);
     return isNaN(date) ? "Неверная дата" : date.toLocaleDateString("ru-RU");
   };
 
-  const addOneMonth = (date) => {
-    const result = new Date(date);
-    result.setMonth(result.getMonth() + 1);
-    return result;
+  const handleCreateIssue = async () => {
+    setErrorMessage("");
+    const response = await createIssue(selectedBook()["value"], selectedReader()["value"]);
+    const responseBody = await response.json();
+    if (response.ok) {
+      loadIssues();
+    } else if (response.status === 400) {
+      console.log(responseBody)
+      setErrorMessage(responseBody["non_field_errors"][0]);
+    } else {
+      console.log("ERROR: " + responseBody)
+    }
   };
 
-  const isEmpty = (val) => !val?.trim();
+  const [selectedBook, setSelectedBook] = createSignal(0);
+  const [selectedReader, setSelectedReader] = createSignal(0);
 
-  const getInputBorder = (val) =>
-    wasSubmitted() && isEmpty(val) ? "2px solid red" : undefined;
+  const [bookOptions, setBookOptions] = createSignal([]);
+  createEffect(() => {
+    const books = bookStore["books"];
+    const options = books.map(book => {
+      const author = book["authors"][0];
+      return {
+        label: `${book["title"]}, ${author["first_name"][0]}. ${author["last_name"]}`,
+        value: book["id"]
+      };
+    });
+    setBookOptions(options);
+  });
 
-  const handleSaveRecord = () => {
-    setWasSubmitted(true);
-    if (isEmpty(book()) || isEmpty(user())) return;
-
-    const now = new Date();
-    const newRecord = {
-      book: book(),
-      user: user(),
-      takenAt: now,
-      dueDate: addOneMonth(now),
-      returnedAt: null,
-      invNumber: String(entries().length + 1).padStart(3, "0"),
-    };
-
-    setEntries([...entries(), newRecord]);
-
-    setBook("");
-    setUser("");
-    setWasSubmitted(false);
-  };
-
-  const [bookId, setBookId] = createSignal(0);
-  const [readerId, setReaderId] = createSignal(0);
+  const[readerOptions, setReaderOptions] = createSignal([]);
+  createEffect(() => {
+    const readers = readerStore["readers"];
+    const options = readers.map(reader => {
+      return {
+        label: `${reader["last_name"]} ${reader["first_name"]} [${reader["username"]}]`,
+        value: reader["id"]
+      };
+    });
+    setReaderOptions(options);
+  })
 
   return (
     <VStack w="$full" px="$7" py="$5" gap="$6" alignItems="start">
@@ -101,111 +98,70 @@ export default function two() {
         <SimpleGrid columns={{ "@initial": 1, "@md": 2 }} gap="$4">
           <Box>
             <Text mb="$2" fontSize="sm">Книга</Text>
-
-            <Select>
-              <SelectTrigger>
-                <SelectPlaceholder>Выберите книгу</SelectPlaceholder>
-                <SelectValue />
-                <SelectIcon />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectListbox>
-                  <For each={
-                    // sort by book["id"]
-                    [...bookStore["books"]].sort((a, b) => {
-                      return a["id"] - b["id"];
-                    })
-                  }>
-                    {(book) => (
-                        <SelectOption>
-                          <SelectOptionText value={book["id"]}>
-                            {book["id"]}. {book["title"]}, {book["authors"]?.[0]?.["last_name"]} {book["authors"]?.[0]?.["first_name"]?.[0]}.
-                          </SelectOptionText>
-                        </SelectOption>
-                    )}
-                  </For>
-                </SelectListbox>
-              </SelectContent>
-            </Select>
-
-            <Select
-                onChange={(e) => setBookId(e.currentTarget.value)}
-            >
-              <For each={
-                // sort by book["id"]
-                [...bookStore["books"]].sort((a, b) => {
-                  return a["id"] - b["id"];
-                })
-              }>
-                {(book) => (
-                    <option value={book["id"]}>
-                      {book["id"]}. {book["title"]}, {book["authors"]?.[0]?.["last_name"]} {book["authors"]?.[0]?.["first_name"]?.[0]}.
-                    </option>
-                )}
-              </For>
-            </Select>
+            <SearchableSelect
+                options={bookOptions()}
+                value={selectedBook()}
+                onChange={setSelectedBook}
+                placeholder="Выберите книгу"
+            />
           </Box>
           <Box>
             <Text mb="$2" fontSize="sm">Читатель</Text>
-            <Input
-              placeholder="Читатель"
-              list="reader-list"
-              style={{ border: getInputBorder(user()) }}
+            <SearchableSelect
+                options={readerOptions()}
+                value={selectedReader()}
+                onChange={setSelectedReader}
+                placeholder="Выберите читателя"
             />
-            <datalist id="reader-list">
-              <For each={readerStore["readers"]}>
-                {(reader) => {
-                  return <option>
-                    {reader["last_name"]} {reader["first_name"]} [{reader["username"]}]
-                  </option>
-                }}
-              </For>
-            </datalist>
           </Box>
         </SimpleGrid>
-        <Button mt="$4" colorScheme="accent" onClick={handleSaveRecord}>
+        <Button
+            mt="$4"
+            colorScheme="accent"
+            onClick={handleCreateIssue}
+            disabled={selectedBook() === 0 || selectedReader() === 0}
+        >
           Добавить запись
         </Button>
+        {errorMessage()?.trim() !== "" && (
+            <Alert status="danger" variant="subtle" mt="$2" borderRadius="$md">
+              <AlertIcon />
+              {errorMessage()}
+            </Alert>
+        )}
       </Box>
 
       <Box w="$md">
-        <Table variant="striped" w="100%" style={{ minWidth: "100%" }}>
+        <Table
+            variant="striped"
+            w="100%"
+            style={{
+              tableLayout: "auto",
+              minWidth: "fit-content",
+            }}
+        >
           <Thead>
             <Tr>
-              <Th>Инв. №</Th>
               <Th>Книга</Th>
               <Th>Читатель</Th>
               <Th>Дата выдачи</Th>
               <Th>Срок возврата</Th>
-              <Th>Дата возврата</Th>
               <Th>Статус</Th>
               <Th></Th>
             </Tr>
           </Thead>
           <Tbody>
-            {entries().map((entry) => (
-              <Tr key={entry.invNumber}>
-                <Td>{entry.invNumber}</Td>
-                <Td>{entry.book}</Td>
-                <Td>{entry.user}</Td>
-                <Td>{formatDate(entry.takenAt)}</Td>
-                <Td>{formatDate(entry.dueDate)}</Td>
-                <Td>{entry.returnedAt ? formatDate(entry.returnedAt) : "-"}</Td>
+            {bookStore["issues"]?.map((issue) => (
+              <Tr key={issue["id"]}>
+                <Td>{issue["inventory"]["book"]["title"]}</Td>
+                <Td>{issue["reader"]["last_name"] + " " + issue["reader"]["first_name"]}</Td>
+                <Td>{issue["issue_date"]}</Td>
+                <Td>{issue["due_date"]}</Td>
                 <Td>
-                  <StatusTag
-                    returnedAt={entry.returnedAt}
-                    dueDate={entry.dueDate}
-                  />
+                  <StatusTag dueDate={issue["due_date"]}/>
                 </Td>
                 <Td>
-                  {!entry.returnedAt && (
-                    <Button
-                      size="xs"
-                      colorScheme="accent"
-                      onClick={() => alert(`Напоминание отправлено: ${entry.user}`)}
-                      leftIcon={<HiOutlineBell />}
-                    />
-                  )}
+
                 </Td>
               </Tr>
             ))}
@@ -216,13 +172,9 @@ export default function two() {
   );
 }
 
-function StatusTag({ returnedAt, dueDate }) {
+function StatusTag({ dueDate }) {
   const now = new Date();
   const due = new Date(dueDate);
-
-  if (returnedAt) {
-    return <Text color="$green10" fontWeight="$medium">Возвращено</Text>;
-  }
 
   if (now > due) {
     return <Text color="$red10" fontWeight="$medium">Просрочено</Text>;

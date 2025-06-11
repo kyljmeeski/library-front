@@ -7,7 +7,7 @@ import {
     fetchDirections,
     createAuthor,
     createPublisher,
-    createDirection, updateBook, createBook
+    createDirection, updateBook, createBook, fetchIssues
 } from "../hooks/useFetch";
 export const CurrentBookContext = createContext()
 
@@ -18,7 +18,13 @@ export default function CurrentBookProvider(props) {
         loadAuthors();
         loadPublishers();
         loadDirections();
-    })
+        loadIssues()
+    });
+
+    const loadIssues = async () => {
+        const issues = await fetchIssues();
+        setStore("issues", issues);
+    }
 
     /**
      * Стягивает все книги, сохраняет их в store.
@@ -58,6 +64,7 @@ export default function CurrentBookProvider(props) {
         publishers: [],
         directions: [],
         books: [],
+        issues: []
     });
 
     const [editingStore, setEditingStore] = createStore({
@@ -308,7 +315,7 @@ export default function CurrentBookProvider(props) {
     }
 
     const currentBookState = {
-        loadAuthors, loadPublishers, loadDirections, loadBooks,
+        loadAuthors, loadPublishers, loadDirections, loadBooks, loadIssues,
         handleInput,
         handleSave, handleNewBookSelect,
         fieldsValidation,

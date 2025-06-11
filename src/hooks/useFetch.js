@@ -267,3 +267,43 @@ export const updateReader = async (id, reader) => {
     }
 };
 
+
+export const createIssue = async (bookId, readerId) => {
+    try {
+        return await fetch(BASE_URL + "api/issues/", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "book_id": bookId,
+                "reader_id": readerId
+            })
+        });
+    } catch (error) {
+        console.log("Error while creating issue: " + error);
+        return {};
+    }
+};
+
+export const fetchIssues = async () => {
+    try {
+        const response = await fetch(BASE_URL + "api/issues/", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`,
+            }
+        });
+        if (response.ok) {
+            return await response.json();
+        } else {
+            console.log("Error while fetching issues: " + await response.json());
+            return [];
+        }
+    } catch (error) {
+        console.log("Error while fetching issues: " + error);
+        return [];
+    }
+};
+
