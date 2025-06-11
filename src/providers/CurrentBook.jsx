@@ -256,6 +256,7 @@ export default function CurrentBookProvider(props) {
             await updateBook(currentBook["id"], book);
         }
 
+        setEditingStore("isCurrentNew", false);
         loadBooks();
     };
 
