@@ -21,7 +21,7 @@ export default function ItemCard() {
                         color={state.currentItemTab == "0" ? "white" : "$blackAlpha11"}
                         backgroundColor={state.currentItemTab == "0" ? "$accent11" : "transparent"}
                     >
-                        Статистика
+                        Книги на руках
                     </Button>
                     <Button
                         onClick={() => openItemTab("1")}

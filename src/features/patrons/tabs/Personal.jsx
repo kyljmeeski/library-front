@@ -23,7 +23,8 @@ export default function Personal() {
     });
 
     return (
-        <VStack w={"$full"} flexGrow={"1"} bgColor={"white"} fontSize={"14px"} px={"$7"} py={"$5"} gap={"$5"}>
+        <VStack alignItems="start" w={"$full"} flexGrow={"1"} bgColor={"white"} fontSize={"14px"} px={"$7"} py={"$5"} gap={"$5"}>
+            <Heading size="lg" color="$accent11">Личные данные</Heading>
             {/* Общая информация */}
             <VStack w={"$full"} alignItems={"start"} gap={"$3"}>
                 <Heading color={"$accent11"}>Общая информация</Heading>

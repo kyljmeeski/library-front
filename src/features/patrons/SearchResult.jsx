@@ -15,7 +15,6 @@ export default function SearchResult(props) {
             _hover={{backgroundColor: "$blackAlpha5"}}
             onClick={() => {
                 handleSelectReader(props["reader"]);
-                openPatronTab("personal");
             }}
         >
             <Text fontSize="12px">
