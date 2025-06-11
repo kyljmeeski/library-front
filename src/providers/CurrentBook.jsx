@@ -77,7 +77,7 @@ export default function CurrentBookProvider(props) {
     const [editingStore, setEditingStore] = createStore({
         isBookSelected: false,
         isLocked: true,
-        isCurrentNew: false,   // Если true -- создаем новую книгу, если false -- редактируем уже существующую
+        isCurrentNew: true,   // Если true -- создаем новую книгу, если false -- редактируем уже существующую
     });
 
     const setBookSelected = (isSelected) => {

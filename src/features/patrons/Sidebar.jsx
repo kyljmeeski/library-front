@@ -26,9 +26,6 @@ export default function Sidebar() {
                 </SimpleSelect>
                 <Input backgroundColor={"white"} fontSize={"14px"} flexBasis={"60%"} borderTopLeftRadius={"0"} borderBottomLeftRadius={"0"} />
             </HStack>
-            <Text color={"$accent11"} alignSelf={"end"} cursor={"pointer"} onClick={() => {onOpen()}}>
-            Расширенный поиск
-            </Text>
             <PatronSearchModal isOpen={isOpen} onClose={onClose}/>
             <VStack w={"$full"} flexGrow={"1"}>
                 <HStack w={"$full"} backgroundColor={"$accent11"}>

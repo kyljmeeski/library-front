@@ -35,6 +35,7 @@ export default function two() {
   const { store: bookStore, loadBorrowedIssues } = useContext(CurrentBookContext);
   const [currentPatronState, {store: readerStore}] = useContext(CurrentPatronContext);
 
+  const [successMessage, setSuccessMessage] = createSignal("");
   const [errorMessage, setErrorMessage] = createSignal("");
 
   const [entries, setEntries] = createSignal(
@@ -55,6 +56,11 @@ export default function two() {
     const responseBody = await response.json();
     if (response.ok) {
       loadBorrowedIssues();
+      setSuccessMessage("Книга успешно выдана!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+      // очищаем поля, когда выдали книгу
+      setSelectedBook(0);
+      setSelectedReader(0);
     } else if (response.status === 400) {
       console.log(responseBody)
       setErrorMessage(responseBody["non_field_errors"][0]);
@@ -93,8 +99,8 @@ export default function two() {
 
   return (
     <VStack w="$full" px="$7" py="$5" gap="$6" alignItems="start">
+      <Heading size="lg" color="$accent11">Выдача книг</Heading>
       <Box w="$full" p="$5" bg="white" borderRadius="$md" boxShadow="$sm">
-        <Heading size="md" mb="$4">Добавить новую запись</Heading>
         <SimpleGrid columns={{ "@initial": 1, "@md": 2 }} gap="$4">
           <Box>
             <Text mb="$2" fontSize="sm">Книга</Text>
@@ -121,49 +127,57 @@ export default function two() {
             onClick={handleCreateIssue}
             disabled={selectedBook() === 0 || selectedReader() === 0}
         >
-          Добавить запись
+          Выдать
         </Button>
-        {errorMessage()?.trim() !== "" && (
-            <Alert status="danger" variant="subtle" mt="$2" borderRadius="$md">
-              <AlertIcon />
-              {errorMessage()}
-            </Alert>
-        )}
       </Box>
+      {errorMessage()?.trim() !== "" && (
+          <Alert status="danger" variant="subtle" mt="$2" borderRadius="$md">
+            <AlertIcon />
+            {errorMessage()}
+          </Alert>
+      )}
+      {successMessage() && (
+          <Alert status="success" mb="$4">
+            <AlertIcon />
+            {successMessage()}
+          </Alert>
+      )}
 
-      <Box w="$md">
-        <Table
-            variant="striped"
-            w="100%"
-            style={{
-              tableLayout: "auto",
-              minWidth: "fit-content",
-            }}
-        >
-          <Thead>
-            <Tr>
-              <Th>Книга</Th>
-              <Th>Читатель</Th>
-              <Th>Дата выдачи</Th>
-              <Th>Срок возврата</Th>
-              <Th></Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {bookStore["borrowedIssues"]?.filter(issue => issue["inventory"]["status"] === "borrowed")?.map((issue) => (
-              <Tr key={issue["id"]}>
-                <Td>{issue["inventory"]["book"]["title"]}</Td>
-                <Td>{issue["reader"]["last_name"] + " " + issue["reader"]["first_name"]}</Td>
-                <Td>{issue["issue_date"]}</Td>
-                <Td>{issue["due_date"]}</Td>
-                <Td>
+      {/* TODO: нужно ли это? */}
+      {/*<Box w="$md">*/}
+      {/*  <Heading size="lg" color="$accent11">Выданные книги</Heading>*/}
+      {/*  <Table*/}
+      {/*      variant="striped"*/}
+      {/*      w="100%"*/}
+      {/*      style={{*/}
+      {/*        tableLayout: "auto",*/}
+      {/*        minWidth: "fit-content",*/}
+      {/*      }}*/}
+      {/*  >*/}
+      {/*    <Thead>*/}
+      {/*      <Tr>*/}
+      {/*        <Th>Книга</Th>*/}
+      {/*        <Th>Читатель</Th>*/}
+      {/*        <Th>Дата выдачи</Th>*/}
+      {/*        <Th>Срок возврата</Th>*/}
+      {/*        <Th></Th>*/}
+      {/*      </Tr>*/}
+      {/*    </Thead>*/}
+      {/*    <Tbody>*/}
+      {/*      {bookStore["borrowedIssues"]?.filter(issue => issue["inventory"]["status"] === "borrowed")?.map((issue) => (*/}
+      {/*        <Tr key={issue["id"]}>*/}
+      {/*          <Td>{issue["inventory"]["book"]["title"]}</Td>*/}
+      {/*          <Td>{issue["reader"]["last_name"] + " " + issue["reader"]["first_name"]}</Td>*/}
+      {/*          <Td>{issue["issue_date"]}</Td>*/}
+      {/*          <Td>{issue["due_date"]}</Td>*/}
+      {/*          <Td>*/}
 
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </Box>
+      {/*          </Td>*/}
+      {/*        </Tr>*/}
+      {/*      ))}*/}
+      {/*    </Tbody>*/}
+      {/*  </Table>*/}
+      {/*</Box>*/}
     </VStack>
   );
 }

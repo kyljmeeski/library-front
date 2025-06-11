@@ -115,14 +115,7 @@ export default function Patrons() {
             <HStack w={"$full"} flexGrow={"1"} gap={"$3"} fontSize={"14px"}>
                 <Sidebar />
                 <VStack flex={"1"} h="$full">
-                    <Switch>
-                        <Match when={state.isPatronSelected}>
-                            <PatronCard />
-                        </Match>
-                        <Match when={!state.isPatronSelected}>
-                            <PatronPageIntro />
-                        </Match>
-                    </Switch>
+                    <PatronCard />
                 </VStack>
             </HStack>
         </VStack>

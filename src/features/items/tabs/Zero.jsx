@@ -40,7 +40,7 @@ export default function Zero() {
 
   return (
     <VStack w="$full" px="$7" py="$5" gap="$6" alignItems="start">
-      <Heading size="lg" color="$accent11">Статистика библиотекаря</Heading>
+      <Heading size="lg" color="$accent11">Статистика</Heading>
 
       <SimpleGrid columns={{ "@initial": 1, "@md": 2 }} gap="$4" w="$md">
         <StatCard label="Всего книг" value={store["books"]?.length} color="gray" icon="📚" />

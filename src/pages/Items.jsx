@@ -16,14 +16,7 @@ export default function Items() {
             <HStack w={"$full"} flexGrow={"1"} gap={"$3"} fontSize={"14px"}>
                 <Sidebar />
                 <VStack flex={"1"} h="$full">
-                    <Switch>
-                        <Match when={editingStore.isBookSelected}>
-                            <ItemCard />
-                        </Match>
-                        <Match when={!editingStore.isBookSelected}>
-                            <ItemPageIntro />
-                        </Match>
-                    </Switch>
+                    <ItemCard />
                 </VStack>
             </HStack>
         </VStack>

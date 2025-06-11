@@ -27,9 +27,9 @@ import {createReturn} from "../../../hooks/useFetch";
   
     return (
       <VStack w="$full" px="$7" py="$5" gap="$6" alignItems="start">
+        <Heading size="lg" color="$accent11">Возврат книг</Heading>
         <Box w="$full" maxW="100%" p="$5" bg="white" borderRadius="$md" boxShadow="$sm">
-          <Heading size="sm" mb="$4">Возврат книг</Heading>
-  
+
           {successMessage() && (
             <Alert status="success" mb="$4">
               <AlertIcon />
@@ -43,7 +43,7 @@ import {createReturn} from "../../../hooks/useFetch";
                 {errorMessage()}
               </Alert>
           )}
-  
+
           <Box overflowX="auto">
             <Table variant="striped" size="xs" minW="700px">
               <Thead>
