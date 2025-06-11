@@ -152,15 +152,6 @@ export default function One() {
               </Box>
 
           </SimpleGrid>
-
-          <Button
-              mt="$4" colorScheme="accent"
-              onClick={() => {
-                  console.log(currentBook);
-              }}
-          >
-              Добавить книгу
-          </Button>
       </Box>
     </VStack>
   );
