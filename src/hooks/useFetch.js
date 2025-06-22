@@ -268,7 +268,7 @@ export const updateReader = async (id, reader) => {
 };
 
 
-export const createIssue = async (bookId, readerId) => {
+export const createIssue = async (bookId, readerId, due_date) => {
     try {
         return await fetch(BASE_URL + "api/issues/", {
             method: "POST",
@@ -278,7 +278,8 @@ export const createIssue = async (bookId, readerId) => {
             },
             body: JSON.stringify({
                 "book_id": bookId,
-                "reader_id": readerId
+                "reader_id": readerId,
+                "due_date": due_date
             })
         });
     } catch (error) {
@@ -355,4 +356,34 @@ export const createReturn = async (issueId) => {
         return {};
     }
 };
+
+export const fetchBook = async (bookId) => {
+    try {
+        return await fetch(BASE_URL + "api/books/" + bookId + "/", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`,
+            }
+        });
+    } catch (error) {
+        console.log("Error while creating return: " + error);
+        return {};
+    }
+}
+
+export const getBookInfoToIssue = async (bookId) => {
+    const bookResponse = await fetchBook(bookId);
+    const book = await bookResponse.json();
+    const borrowedIssues = await fetchBorrowedIssues();
+
+    const overallCount = book["quantity"];
+    const borrowedCount = borrowedIssues.filter(issue => {return issue["inventory"]["book"]["id"] === bookId}).length;
+
+    return {
+        "overall": overallCount,
+        "borrowed": borrowedCount,
+        "available": overallCount - borrowedCount,
+        "description": book["description"],
+    }
+}
 

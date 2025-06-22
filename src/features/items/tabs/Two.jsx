@@ -17,14 +17,16 @@ import {
   SelectPlaceholder,
   SelectValue,
   SelectIcon,
-  SelectContent, SelectListbox, SelectOption, SelectOptionText, SelectLabel, Alert, AlertIcon
+  SelectContent, SelectListbox, SelectOption, SelectOptionText, SelectLabel, Alert, AlertIcon, HStack, Stack
 } from "@hope-ui/solid";
 import {createEffect, createSignal, For, useContext} from "solid-js";
 import { HiOutlineBell } from "solid-icons/hi";
 import {CurrentBookContext} from "../../../providers/CurrentBook";
 import {CurrentPatronContext} from "../../../providers/CurrentPatron";
 import {SearchableSelect} from "../../SearchableSelect";
-import {createIssue} from "../../../hooks/useFetch";
+import {createIssue, getBookInfoToIssue} from "../../../hooks/useFetch";
+import DateSelector from "../../DateSelector";
+import {createStore} from "solid-js/store";
 
 const initialData = [
 
@@ -38,21 +40,9 @@ export default function two() {
   const [successMessage, setSuccessMessage] = createSignal("");
   const [errorMessage, setErrorMessage] = createSignal("");
 
-  const [entries, setEntries] = createSignal(
-    initialData.map((entry, i) => ({
-      ...entry,
-      invNumber: String(i + 1).padStart(3, "0"),
-    }))
-  );
-
-  const formatDate = (val) => {
-    const date = new Date(val);
-    return isNaN(date) ? "Неверная дата" : date.toLocaleDateString("ru-RU");
-  };
-
   const handleCreateIssue = async () => {
     setErrorMessage("");
-    const response = await createIssue(selectedBook()["value"], selectedReader()["value"]);
+    const response = await createIssue(selectedBook()["value"], selectedReader()["value"], dueDate());
     const responseBody = await response.json();
     if (response.ok) {
       loadBorrowedIssues();
@@ -61,6 +51,11 @@ export default function two() {
       // очищаем поля, когда выдали книгу
       setSelectedBook(0);
       setSelectedReader(0);
+      setDueDate("");
+      setBookInfo("description", "");
+      setBookInfo("overall", 0);
+      setBookInfo("borrowed", 0);
+      setBookInfo("available", 0);
     } else if (response.status === 400) {
       console.log(responseBody)
       setErrorMessage(responseBody["non_field_errors"][0]);
@@ -71,6 +66,30 @@ export default function two() {
 
   const [selectedBook, setSelectedBook] = createSignal(0);
   const [selectedReader, setSelectedReader] = createSignal(0);
+  const [dueDate, setDueDate] = createSignal("");
+
+  const selectBook = async (selected) => {
+    const bookId = selected["value"];
+    const bookInfo = await getBookInfoToIssue(bookId);
+    setBookInfo("overall", bookInfo["overall"]);
+    setBookInfo("borrowed", bookInfo["borrowed"]);
+    setBookInfo("available", bookInfo["available"]);
+    setBookInfo("description", bookInfo["description"]);
+    setSelectedBook(selected);
+  };
+
+  const [bookInfo, setBookInfo] = createStore({
+    "overall": 0,
+    "borrowed": 0,
+    "available": 0,
+    "description": "",
+  });
+
+  const addDaysToToday = (days) => {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10); // YYYY-MM-DD format for <input type="date">
+  }
 
   const [bookOptions, setBookOptions] = createSignal([]);
   createEffect(() => {
@@ -100,84 +119,69 @@ export default function two() {
   return (
     <VStack w="$full" px="$7" py="$5" gap="$6" alignItems="start">
       <Heading size="lg" color="$accent11">Выдача книг</Heading>
-      <Box w="$full" p="$5" bg="white" borderRadius="$md" boxShadow="$sm">
-        <SimpleGrid columns={{ "@initial": 1, "@md": 2 }} gap="$4">
-          <Box>
-            <Text mb="$2" fontSize="sm">Книга</Text>
-            <SearchableSelect
-                options={bookOptions()}
-                value={selectedBook()}
-                onChange={setSelectedBook}
-                placeholder="Выберите книгу"
+      <VStack w="$full" gap="$4" alignItems="start">
+        <Box w="$full">
+          <Text mb="$2" fontSize="sm">Книга</Text>
+          <SearchableSelect
+              options={bookOptions()}
+              value={selectedBook()}
+              onChange={selectBook}
+              placeholder="Выберите книгу"
+          />
+          <Text mt="$2" fontSize="sm">
+            Всего {bookInfo["overall"]} экз. •
+            На руках: {bookInfo["borrowed"]} экз. •
+            Осталось: {bookInfo["available"]} экз.
+            {bookInfo["description"] ? " | " + bookInfo["description"] : ""}
+          </Text>
+        </Box>
+        <Box w="$full">
+          <Text mb="$2" fontSize="sm">Читатель</Text>
+          <SearchableSelect
+              options={readerOptions()}
+              value={selectedReader()}
+              onChange={setSelectedReader}
+              placeholder="Выберите читателя"
+          />
+        </Box>
+        <Box w="$full">
+          <Text mb="$2" fontSize="sm">Дата возврата</Text>
+          <Stack gap="$3">
+            <DateSelector
+                name="publish_date"
+                value={dueDate}
+                setValue={(val) => setDueDate(val)}
             />
-          </Box>
-          <Box>
-            <Text mb="$2" fontSize="sm">Читатель</Text>
-            <SearchableSelect
-                options={readerOptions()}
-                value={selectedReader()}
-                onChange={setSelectedReader}
-                placeholder="Выберите читателя"
-            />
-          </Box>
-        </SimpleGrid>
-        <Button
-            mt="$4"
-            colorScheme="accent"
-            onClick={handleCreateIssue}
-            disabled={selectedBook() === 0 || selectedReader() === 0}
-        >
-          Выдать
-        </Button>
-      </Box>
-      {errorMessage()?.trim() !== "" && (
-          <Alert status="danger" variant="subtle" mt="$2" borderRadius="$md">
-            <AlertIcon />
-            {errorMessage()}
-          </Alert>
-      )}
-      {successMessage() && (
-          <Alert status="success" mb="$4">
-            <AlertIcon />
-            {successMessage()}
-          </Alert>
-      )}
-
-      {/* TODO: нужно ли это? */}
-      {/*<Box w="$md">*/}
-      {/*  <Heading size="lg" color="$accent11">Выданные книги</Heading>*/}
-      {/*  <Table*/}
-      {/*      variant="striped"*/}
-      {/*      w="100%"*/}
-      {/*      style={{*/}
-      {/*        tableLayout: "auto",*/}
-      {/*        minWidth: "fit-content",*/}
-      {/*      }}*/}
-      {/*  >*/}
-      {/*    <Thead>*/}
-      {/*      <Tr>*/}
-      {/*        <Th>Книга</Th>*/}
-      {/*        <Th>Читатель</Th>*/}
-      {/*        <Th>Дата выдачи</Th>*/}
-      {/*        <Th>Срок возврата</Th>*/}
-      {/*        <Th></Th>*/}
-      {/*      </Tr>*/}
-      {/*    </Thead>*/}
-      {/*    <Tbody>*/}
-      {/*      {bookStore["borrowedIssues"]?.filter(issue => issue["inventory"]["status"] === "borrowed")?.map((issue) => (*/}
-      {/*        <Tr key={issue["id"]}>*/}
-      {/*          <Td>{issue["inventory"]["book"]["title"]}</Td>*/}
-      {/*          <Td>{issue["reader"]["last_name"] + " " + issue["reader"]["first_name"]}</Td>*/}
-      {/*          <Td>{issue["issue_date"]}</Td>*/}
-      {/*          <Td>{issue["due_date"]}</Td>*/}
-      {/*          <Td>*/}
-
-      {/*          </Td>*/}
-      {/*        </Tr>*/}
-      {/*      ))}*/}
-      {/*    </Tbody>*/}
-      {/*  </Table>*/}
-      {/*</Box>*/}
+            <HStack gap="$3">
+              <Button onClick={() => setDueDate(addDaysToToday(1))}>1 день</Button>
+              <Button onClick={() => setDueDate(addDaysToToday(3))}>3 дня</Button>
+              <Button onClick={() => setDueDate(addDaysToToday(7))}>1 неделя</Button>
+              <Button onClick={() => setDueDate(addDaysToToday(20))}>1 месяц</Button>
+            </HStack>
+          </Stack>
+        </Box>
+        <HStack w="$full" justifyContent="space-between" alignItems="end">
+          <Button
+              colorScheme="accent"
+              onClick={handleCreateIssue}
+              disabled={selectedBook() === 0 || selectedReader() === 0 || !dueDate()}
+          >
+            Выдать
+          </Button>
+          {errorMessage()?.trim() !== "" && (
+              <Alert status="danger" variant="subtle" borderRadius="$md">
+                <AlertIcon />
+                {errorMessage()}
+              </Alert>
+          )}
+          {successMessage() && (
+              <Alert status="success">
+                <AlertIcon />
+                {successMessage()}
+              </Alert>
+          )}
+        </HStack>
+      </VStack>
     </VStack>
   );
 }

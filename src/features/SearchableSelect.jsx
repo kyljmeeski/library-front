@@ -61,7 +61,7 @@ export function SearchableSelect(props) {
     });
 
     return (
-        <Box ref={(el) => (containerRef = el)} position="relative" w="$64">
+        <Box ref={(el) => (containerRef = el)} position="relative" w="$full">
             <Input
                 ref={(el) => (inputRef = el)}
                 placeholder={props.placeholder ?? "Select..."}
