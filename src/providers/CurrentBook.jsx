@@ -97,7 +97,9 @@ export default function CurrentBookProvider(props) {
         "udc": "",
         "bbk": "",
         "isbn": "",
-        "quantity": 0
+        "quantity": 0,
+        "category": "",
+        "description": "",
     });
 
     const [errors, setErrors] = createStore({
@@ -109,6 +111,7 @@ export default function CurrentBookProvider(props) {
         "bbk": false,
         "isbn": false,
         "quantity": false,
+        "category": false,
     });
 
     const [fieldsValidation, setFieldsValidation] = createStore({
@@ -132,11 +135,13 @@ export default function CurrentBookProvider(props) {
             !errors.udc &&
             !errors.bbk &&
             !errors.isbn &&
+            !errors.category &&
             !errors.quantity;
         setAreFieldsValid(valid);
     });
 
     const handleInput = (event) => {
+        console.log(event);
         const { name, value } = event.target;
         setCurrentBook(name, value);
     }
@@ -247,7 +252,9 @@ export default function CurrentBookProvider(props) {
             "udc": currentBook["udc"],
             "bbk": currentBook["bbk"],
             "isbn": currentBook["isbn"],
-            "quantity": currentBook["quantity"]
+            "quantity": currentBook["quantity"],
+            "category": currentBook["category"],
+            "description": currentBook["description"],
         };
 
         if (editingStore.isCurrentNew) {  // создаем новую книгу
@@ -277,6 +284,8 @@ export default function CurrentBookProvider(props) {
         setCurrentBook("bbk", "");
         setCurrentBook("isbn", "");
         setCurrentBook("quantity", 0);
+        setCurrentBook("category", "");
+        setCurrentBook("description", "");
 
         setEditingStore("isCurrentNew", true);
     }
@@ -305,6 +314,8 @@ export default function CurrentBookProvider(props) {
         setCurrentBook("bbk", book["bbk"]);
         setCurrentBook("isbn", book["isbn"]);
         setCurrentBook("quantity", book["quantity"]);
+        setCurrentBook("category", book["category"]);
+        setCurrentBook("description", book["description"]);
     }
 
     const createNewBook = () => {

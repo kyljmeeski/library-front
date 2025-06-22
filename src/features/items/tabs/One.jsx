@@ -1,4 +1,14 @@
-import {Box, Button, Heading, Input, SimpleGrid, VStack} from "@hope-ui/solid";
+import {
+    Box,
+    Button,
+    Heading,
+    Input,
+    Select, SelectContent, SelectIcon, SelectListbox, SelectOption,
+    SelectPlaceholder,
+    SelectTrigger, SelectValue,
+    SimpleGrid,
+    VStack
+} from "@hope-ui/solid";
 import {createEffect, createSignal, For, useContext} from "solid-js";
 import {CurrentBookContext} from "../../../providers/CurrentBook";
 
@@ -10,6 +20,7 @@ export default function One() {
     setErrors("title", !currentBook["title"]);
     setErrors("publisher", !currentBook["publisher"]);
     setErrors("direction", !currentBook["direction"]);
+    setErrors("category", !currentBook["category"]);
     setErrors("quantity", !currentBook["quantity"] || currentBook["quantity"] < 0);
 
     // Author should have either: first_name, last_name or first_name, last_name, middle_name
@@ -95,6 +106,33 @@ export default function One() {
               </Box>
 
               <Box mb="$4">
+                  <label>Категория</label>
+                  <Select
+                      name="category"
+                      value={currentBook["category"]}
+                      onChange={(val) =>
+                          handleInput({ target: { name: "category", value: val } })
+                      }
+                      disabled={editingStore.isLocked}
+                      invalid={errors["category"]}
+                  >
+                      <SelectTrigger>
+                          <SelectPlaceholder>Выберите категорию</SelectPlaceholder>
+                          <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                          <SelectListbox>
+                              <SelectOption value="textbook">Учебник</SelectOption>
+                              <SelectOption value="manual">Руководство</SelectOption>
+                              <SelectOption value="fiction">Художественная литература</SelectOption>
+                              <SelectOption value="science">Научная литература</SelectOption>
+                              <SelectOption value="other">Другое</SelectOption>
+                          </SelectListbox>
+                      </SelectContent>
+                  </Select>
+              </Box>
+
+              <Box mb="$4">
                   <label>Направление</label>
                   <Input
                       name="direction"
@@ -134,6 +172,18 @@ export default function One() {
                       disabled={editingStore.isLocked}
                       onInput={(e) => handleInput(e)}
                       invalid={errors["isbn"]}
+                  />
+              </Box>
+
+              <Box mb="$4">
+                  <label>Дополнительная информация</label>
+                  <Input
+                      name="description"
+                      placeholder=""
+                      value={currentBook["description"]}
+                      disabled={editingStore.isLocked}
+                      onInput={(e) => handleInput(e)}
+                      invalid={errors["description"]}
                   />
               </Box>
 
