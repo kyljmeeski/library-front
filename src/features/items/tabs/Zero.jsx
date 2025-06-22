@@ -38,20 +38,70 @@ export default function Zero() {
     };
   });
 
+  store["borrowedIssues"]?.length
+
   return (
-    <VStack w="$full" px="$7" py="$5" gap="$6" alignItems="start">
-      <Heading size="lg" color="$accent11">Статистика</Heading>
+      <VStack w="$full" px="$7" py="$5" gap="$6" alignItems="start">
+        <Heading size="lg" color="$accent11">Статистика</Heading>
 
-      <SimpleGrid columns={{ "@initial": 1, "@md": 2 }} gap="$4" w="$md">
-        <StatCard label="Всего книг" value={store["books"]?.length} color="gray" icon="📚" />
-        <StatCard label="Выдано" value={store["borrowedIssues"]?.length} color="orange" icon="📖" />
-      </SimpleGrid>
+        {/* Общая информация */}
+        <SimpleGrid columns={{ "@initial": 1, "@md": 2 }} gap="$4" w="$full">
+          <StatCard
+              label="Всего книг"
+              value={store["books"]?.length}
+              color="accent"
+              icon="📚"
+          />
+          <StatCard
+              label="Всего экземпляров"
+              value={store["books"]?.reduce((sum, b) => sum + (b.quantity || 0), 0)}
+              color="accent"
+              icon="📦"
+          />
+          <StatCard
+              label="Выдано экземпляров"
+              value={store["borrowedIssues"]?.length}
+              color="accent"
+              icon="📤"
+          />
+          <StatCard
+              label="Доступно экземпляров"
+              value={store["books"]?.reduce((sum, b) => sum + (b.quantity || 0), 0) - store["borrowedIssues"]?.length}
+              color="accent"
+              icon="📥"
+          />
+        </SimpleGrid>
 
-      <SimpleGrid columns={1} gap="$4" w="$md">
-        <StatCard label="Просрочено" value={stats().overdue} color="red" icon="⏳" />
-        <StatCard label="Возвращено" value={store["returns"]?.length} color="green" icon="✔️" />
-      </SimpleGrid>
-    </VStack>
+        {/* Категории */}
+        <Heading size="md" mt="$4">По категориям</Heading>
+        <SimpleGrid columns={{ "@initial": 1, "@sm": 2, "@md": 3 }} gap="$3" w="$full">
+          <StatCard
+              label="Учебники"
+              value={store["books"]?.filter(b => b.category === "textbook").length}
+              color="gray"
+          />
+          <StatCard
+              label="Руководства"
+              value={store["books"]?.filter(b => b.category === "manual").length}
+              color="gray"
+          />
+          <StatCard
+              label="Художественная"
+              value={store["books"]?.filter(b => b.category === "fiction").length}
+              color="gray"
+          />
+          <StatCard
+              label="Научная литература"
+              value={store["books"]?.filter(b => b.category === "science").length}
+              color="gray"
+          />
+          <StatCard
+              label="Другое"
+              value={store["books"]?.filter(b => b.category === "other").length}
+              color="gray"
+          />
+        </SimpleGrid>
+      </VStack>
   );
 }
 
